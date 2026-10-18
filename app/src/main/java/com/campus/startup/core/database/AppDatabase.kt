@@ -6,11 +6,23 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.campus.startup.features.opportunities.data.local.OpportunityDao
 import com.campus.startup.features.opportunities.data.local.OpportunityEntity
+import com.campus.startup.features.recruitment.data.local.JobApplicationEntity
+import com.campus.startup.features.recruitment.data.local.RecruitmentDao
+import com.campus.startup.features.recruitment.data.local.StartupOpeningEntity
 
-@Database(entities = [OpportunityEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [
+        OpportunityEntity::class,
+        StartupOpeningEntity::class,
+        JobApplicationEntity::class
+    ],
+    version = 2,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun opportunityDao(): OpportunityDao
+    abstract fun recruitmentDao(): RecruitmentDao
 
     companion object {
         @Volatile

@@ -1,0 +1,289 @@
+package com.campus.startup.features.recruitment.presentation
+
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BusinessCenter
+import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.campus.startup.core.theme.PrimaryBlue
+import com.campus.startup.core.theme.StartupGreen
+import com.campus.startup.features.opportunities.presentation.components.SearchBarComponent
+import com.campus.startup.features.recruitment.data.model.StartupRoleCategory
+import com.campus.startup.features.recruitment.presentation.components.RoleCategoryTabs
+import com.campus.startup.features.recruitment.presentation.components.SkillFilterSection
+import com.campus.startup.features.recruitment.presentation.components.StartupOpeningCard
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StartupRecruitmentScreen(
+    viewModel: RecruitmentViewModel,
+    onOpeningClick: (String) -> Unit,
+    onNavigateToApplications: () -> Unit,
+    onNavigateToSaved: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+    val studentSkills by viewModel.studentSkills.collectAsState()
+    val onlyMatching by viewModel.onlyMatchingSkills.collectAsState()
+    val workTypeFilter by viewModel.workTypeFilter.collectAsState()
+
+    var showPostOpeningDialog by remember { mutableStateOf(false) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Startup Recruitment",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = StartupGreen.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "HIRING",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = StartupGreen,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Text(
+                            text = "Founders hiring developers, designers, marketers & interns",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                actions = {
+                    // Applications tracker
+                    IconButton(onClick = onNavigateToApplications) {
+                        Icon(
+                            imageVector = Icons.Outlined.Assignment,
+                            contentDescription = "Applications & Founder Portal",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    // Saved bookmarks
+                    val savedCount = (uiState as? RecruitmentUiState.Success)?.savedCount ?: 0
+                    BadgedBox(
+                        badge = {
+                            if (savedCount > 0) {
+                                Badge(containerColor = PrimaryBlue) {
+                                    Text(savedCount.toString())
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        IconButton(onClick = onNavigateToSaved) {
+                            Icon(
+                                imageVector = if (savedCount > 0) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = "Saved Roles",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { showPostOpeningDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(16.dp),
+                icon = { Icon(Icons.Default.Add, contentDescription = "Post Opening") },
+                text = { Text("Post Opening", fontWeight = FontWeight.Bold) }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            // Search Input
+            SearchBarComponent(
+                query = searchQuery,
+                onQueryChange = viewModel::onSearchQueryChanged
+            )
+
+            // Role Categories Filter: All, Developers, Designers, Marketers, Interns
+            RoleCategoryTabs(
+                selectedCategory = selectedCategory,
+                onCategorySelected = viewModel::onCategorySelected
+            )
+
+            // Work Type Filter Chips (All, Remote, Hybrid, On-Campus)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                listOf("All", "Remote", "Hybrid", "On-Campus").forEach { type ->
+                    val isSelected = workTypeFilter == type
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { viewModel.onWorkTypeFilterChanged(type) },
+                        label = { Text(type, style = MaterialTheme.typography.labelSmall) },
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                }
+            }
+
+            // Smart Skill Matcher Section (interactive skill selector & match toggle)
+            SkillFilterSection(
+                studentSkills = studentSkills,
+                onlyMatching = onlyMatching,
+                onSkillToggle = viewModel::toggleStudentSkill,
+                onOnlyMatchingToggle = viewModel::toggleOnlyMatching
+            )
+
+            // Openings List or Empty State
+            when (val state = uiState) {
+                is RecruitmentUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = PrimaryBlue)
+                    }
+                }
+                is RecruitmentUiState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = state.message, color = MaterialTheme.colorScheme.error)
+                    }
+                }
+                is RecruitmentUiState.Success -> {
+                    if (state.openings.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(text = "🔎", style = MaterialTheme.typography.headlineLarge)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = "No startup openings found",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Try adjusting your role category, search keyword, or toggle off 'Only show matching roles'.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
+                        ) {
+                            // Subheader stats
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "${state.openings.size} Openings Available",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    if (state.highMatchCount > 0) {
+                                        Surface(
+                                            shape = RoundedCornerShape(8.dp),
+                                            color = StartupGreen.copy(alpha = 0.15f)
+                                        ) {
+                                            Text(
+                                                text = "🔥 ${state.highMatchCount} High Matches for you",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = StartupGreen,
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            items(
+                                items = state.openings,
+                                key = { it.id }
+                            ) { opening ->
+                                StartupOpeningCard(
+                                    opening = opening,
+                                    onClick = { onOpeningClick(opening.id) },
+                                    onSaveToggle = { viewModel.toggleSaveOpening(opening) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showPostOpeningDialog) {
+        PostOpeningDialog(
+            onDismiss = { showPostOpeningDialog = false },
+            onSubmit = { startupName, startupLogo, startupStage, title, roleCat, skills, workType, commitment, stipend, loc, days, desc, resps, perks, fName, fEmail ->
+                viewModel.postOpening(
+                    startupName = startupName,
+                    startupLogo = startupLogo,
+                    startupStage = startupStage,
+                    title = title,
+                    roleCategory = roleCat,
+                    skills = skills,
+                    workType = workType,
+                    commitment = commitment,
+                    stipend = stipend,
+                    location = loc,
+                    deadlineDays = days,
+                    description = desc,
+                    responsibilities = resps,
+                    perks = perks,
+                    founderName = fName,
+                    founderEmail = fEmail
+                )
+                showPostOpeningDialog = false
+            }
+        )
+    }
+}
