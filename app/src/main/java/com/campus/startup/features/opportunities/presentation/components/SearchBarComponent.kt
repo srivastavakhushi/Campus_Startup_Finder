@@ -18,7 +18,8 @@ import androidx.compose.ui.unit.dp
 fun SearchBarComponent(
     query: String,
     onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    placeholder: String = "Search hackathons, startup roles, grants..."
 ) {
     OutlinedTextField(
         value = query,
@@ -28,7 +29,7 @@ fun SearchBarComponent(
             .padding(horizontal = 16.dp, vertical = 6.dp),
         placeholder = {
             Text(
-                text = "Search hackathons, startup roles, grants...",
+                text = placeholder,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )

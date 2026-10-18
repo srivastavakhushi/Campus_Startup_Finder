@@ -8,6 +8,14 @@ sealed class Screen(val route: String) {
     }
     object ApplicationsAndFounder : Screen("applications_and_founder")
 
+    // Co-founder & Team Matching
+    object Cofounders : Screen("cofounder_matching")
+    object CofounderDetail : Screen("cofounder_detail/{profileId}") {
+        fun createRoute(profileId: String): String = "cofounder_detail/$profileId"
+    }
+    object EditMatchProfile : Screen("edit_match_profile")
+    object CofounderConnections : Screen("cofounder_connections")
+
     // Campus Opportunities Feed (Hackathons, Grants, Competitions)
     object Feed : Screen("opportunities_feed")
     object Detail : Screen("opportunity_detail/{opportunityId}") {

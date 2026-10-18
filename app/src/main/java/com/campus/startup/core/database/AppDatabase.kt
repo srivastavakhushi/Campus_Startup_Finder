@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.campus.startup.features.matching.data.local.ConnectionRequestEntity
+import com.campus.startup.features.matching.data.local.MatchingDao
+import com.campus.startup.features.matching.data.local.StudentProfileEntity
 import com.campus.startup.features.opportunities.data.local.OpportunityDao
 import com.campus.startup.features.opportunities.data.local.OpportunityEntity
 import com.campus.startup.features.recruitment.data.local.JobApplicationEntity
@@ -14,15 +17,18 @@ import com.campus.startup.features.recruitment.data.local.StartupOpeningEntity
     entities = [
         OpportunityEntity::class,
         StartupOpeningEntity::class,
-        JobApplicationEntity::class
+        JobApplicationEntity::class,
+        StudentProfileEntity::class,
+        ConnectionRequestEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun opportunityDao(): OpportunityDao
     abstract fun recruitmentDao(): RecruitmentDao
+    abstract fun matchingDao(): MatchingDao
 
     companion object {
         @Volatile

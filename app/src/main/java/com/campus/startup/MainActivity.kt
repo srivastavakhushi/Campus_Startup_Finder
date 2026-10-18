@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.*
@@ -26,6 +28,13 @@ import androidx.navigation.navArgument
 import com.campus.startup.core.database.AppDatabase
 import com.campus.startup.core.navigation.Screen
 import com.campus.startup.core.theme.CampusStartupFinderTheme
+import com.campus.startup.features.matching.data.repository.MatchingRepository
+import com.campus.startup.features.matching.presentation.CofounderDetailScreen
+import com.campus.startup.features.matching.presentation.CofounderMatchingScreen
+import com.campus.startup.features.matching.presentation.ConnectionsScreen
+import com.campus.startup.features.matching.presentation.EditMatchProfileScreen
+import com.campus.startup.features.matching.presentation.MatchingViewModel
+import com.campus.startup.features.matching.presentation.MatchingViewModelFactory
 import com.campus.startup.features.opportunities.data.repository.OpportunityRepository
 import com.campus.startup.features.opportunities.presentation.*
 import com.campus.startup.features.recruitment.data.repository.RecruitmentRepository
@@ -40,9 +49,11 @@ class MainActivity : ComponentActivity() {
         val database = AppDatabase.getInstance(applicationContext)
         val opportunityRepository = OpportunityRepository(database.opportunityDao())
         val recruitmentRepository = RecruitmentRepository(database.recruitmentDao())
+        val matchingRepository = MatchingRepository(database.matchingDao())
 
         val oppViewModelFactory = OpportunitiesViewModelFactory(opportunityRepository)
         val recViewModelFactory = RecruitmentViewModelFactory(recruitmentRepository)
+        val matchingViewModelFactory = MatchingViewModelFactory(matchingRepository)
 
         setContent {
             val oppViewModel: OpportunitiesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -50,6 +61,9 @@ class MainActivity : ComponentActivity() {
             )
             val recViewModel: RecruitmentViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
                 factory = recViewModelFactory
+            )
+            val matchingViewModel: MatchingViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                factory = matchingViewModelFactory
             )
 
             val navController = rememberNavController()
@@ -70,6 +84,12 @@ class MainActivity : ComponentActivity() {
                     unselectedIcon = Icons.Outlined.School
                 ),
                 BottomNavItem(
+                    title = "Co-founders",
+                    route = Screen.Cofounders.route,
+                    selectedIcon = Icons.Filled.Groups,
+                    unselectedIcon = Icons.Outlined.Groups
+                ),
+                BottomNavItem(
                     title = "Applications",
                     route = Screen.ApplicationsAndFounder.route,
                     selectedIcon = Icons.Filled.Assignment,
@@ -80,6 +100,7 @@ class MainActivity : ComponentActivity() {
             val showBottomBar = currentRoute in listOf(
                 Screen.Recruitment.route,
                 Screen.Feed.route,
+                Screen.Cofounders.route,
                 Screen.ApplicationsAndFounder.route
             )
 
@@ -176,7 +197,55 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // 4. Opportunities Feed (Hackathons, Grants & Competitions)
+                        // 4. Co-founder & Team Matching
+                        composable(Screen.Cofounders.route) {
+                            CofounderMatchingScreen(
+                                viewModel = matchingViewModel,
+                                onStudentClick = { profileId ->
+                                    navController.navigate(Screen.CofounderDetail.createRoute(profileId))
+                                },
+                                onEditProfile = {
+                                    navController.navigate(Screen.EditMatchProfile.route)
+                                },
+                                onOpenConnections = {
+                                    navController.navigate(Screen.CofounderConnections.route)
+                                }
+                            )
+                        }
+
+                        composable(
+                            route = Screen.CofounderDetail.route,
+                            arguments = listOf(
+                                navArgument("profileId") { type = NavType.StringType }
+                            )
+                        ) { backStackEntry ->
+                            val profileId = backStackEntry.arguments?.getString("profileId") ?: ""
+                            CofounderDetailScreen(
+                                profileId = profileId,
+                                viewModel = matchingViewModel,
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(Screen.EditMatchProfile.route) {
+                            EditMatchProfileScreen(
+                                viewModel = matchingViewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                                onSaved = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(Screen.CofounderConnections.route) {
+                            ConnectionsScreen(
+                                viewModel = matchingViewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                                onStudentClick = { profileId ->
+                                    navController.navigate(Screen.CofounderDetail.createRoute(profileId))
+                                }
+                            )
+                        }
+
+                        // 5. Opportunities Feed (Hackathons, Grants & Competitions)
                         composable(Screen.Feed.route) {
                             OpportunitiesFeedScreen(
                                 viewModel = oppViewModel,
@@ -189,7 +258,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // 5. Opportunity Detail Screen
+                        // 6. Opportunity Detail Screen
                         composable(
                             route = Screen.Detail.route,
                             arguments = listOf(
@@ -206,7 +275,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // 6. Saved Opportunities Screen
+                        // 7. Saved Opportunities Screen
                         composable(Screen.Saved.route) {
                             SavedOpportunitiesScreen(
                                 viewModel = oppViewModel,
