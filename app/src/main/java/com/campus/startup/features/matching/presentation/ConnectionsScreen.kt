@@ -20,7 +20,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.campus.startup.core.components.ModernAvatar
 import com.campus.startup.core.theme.PrimaryBlue
 import com.campus.startup.core.theme.StartupGreen
 import com.campus.startup.features.matching.data.model.ConnectionRequest
@@ -93,7 +95,7 @@ fun ConnectionsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -151,8 +153,13 @@ fun ConnectionsScreen(
                     if (rows.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("🤝", style = MaterialTheme.typography.headlineLarge)
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Icon(
+                                    Icons.Default.Group,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(56.dp)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = if (allRows.isEmpty()) "No connection requests yet" else "Nothing in ${tab.label}",
                                     style = MaterialTheme.typography.titleMedium,
@@ -229,12 +236,12 @@ private fun ConnectionCard(
             modifier = Modifier.fillMaxWidth().padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(modifier = Modifier.size(42.dp), shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(text = profile?.avatar ?: "🎓", style = MaterialTheme.typography.titleMedium)
-                }
-            }
-            Spacer(modifier = Modifier.width(10.dp))
+            ModernAvatar(
+                name = profile?.name ?: "Student",
+                role = profile?.preferredRole,
+                size = 46.dp
+            )
+            Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = profile?.name ?: "Campus student",

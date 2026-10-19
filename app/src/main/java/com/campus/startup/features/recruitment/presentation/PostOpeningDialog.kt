@@ -10,7 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.campus.startup.core.theme.PrimaryBlue
+import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.features.recruitment.data.model.SkillItem
 import com.campus.startup.features.recruitment.data.model.StartupRoleCategory
 
@@ -38,7 +38,7 @@ fun PostOpeningDialog(
     ) -> Unit
 ) {
     var startupName by remember { mutableStateOf("") }
-    var startupLogo by remember { mutableStateOf("🚀") }
+    var startupLogo by remember { mutableStateOf("TECH") }
     var startupStage by remember { mutableStateOf("Incubated at Campus Hub") }
     var title by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(StartupRoleCategory.DEVELOPER) }
@@ -54,7 +54,7 @@ fun PostOpeningDialog(
     var founderName by remember { mutableStateOf("") }
     var founderEmail by remember { mutableStateOf("") }
 
-    val emojis = listOf("🚀", "⚡", "💻", "🎨", "📢", "🍔", "🤖", "🌱", "📱", "🎯")
+    val logoBadges = listOf("TECH", "AI", "FIN", "DEV", "DES", "APP", "ECO", "EDU", "LAB", "HUB")
     val workTypes = listOf("Remote", "Hybrid", "On-Campus")
     val commitments = listOf("Internship", "Part-Time", "Full-Time")
 
@@ -92,23 +92,24 @@ fun PostOpeningDialog(
                 )
 
                 // Logo selector
-                Text(text = "Choose Startup Badge / Emoji:", style = MaterialTheme.typography.labelMedium)
+                Text(text = "Choose Startup Badge Tag:", style = MaterialTheme.typography.labelMedium)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    emojis.forEach { emoji ->
-                        val isSelected = startupLogo == emoji
+                    logoBadges.forEach { badge ->
+                        val isSelected = startupLogo == badge
                         FilledTonalButton(
-                            onClick = { startupLogo = emoji },
+                            onClick = { startupLogo = badge },
                             colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant
+                                containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                             ),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
-                            Text(text = emoji, style = MaterialTheme.typography.titleMedium)
+                            Text(text = badge, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -135,7 +136,7 @@ fun PostOpeningDialog(
                         FilterChip(
                             selected = selectedCategory == category,
                             onClick = { selectedCategory = category },
-                            label = { Text("${category.emoji} ${category.displayName}") }
+                            label = { Text(category.displayName) }
                         )
                     }
                 }
@@ -314,7 +315,7 @@ fun PostOpeningDialog(
                 },
                 enabled = startupName.isNotBlank() && title.isNotBlank() && description.isNotBlank()
             ) {
-                Text("Publish Opening 🚀")
+                Text("Publish Opening", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {

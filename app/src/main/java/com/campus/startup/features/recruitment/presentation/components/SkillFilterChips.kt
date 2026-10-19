@@ -1,25 +1,39 @@
 package com.campus.startup.features.recruitment.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.campus.startup.core.theme.PrimaryBlue
+import com.campus.startup.core.theme.DarkBorder
+import com.campus.startup.core.theme.DarkSurface
+import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.features.recruitment.data.model.SkillItem
 
 @Composable
 fun SkillFilterSection(
+    studentSkills: Set<String>,
+    onlyMatching: Boolean,
+    onSkillToggle: (String) -> Unit,
+    onOnlyMatchingToggle: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SkillFilterChips(studentSkills, onlyMatching, onSkillToggle, onOnlyMatchingToggle, modifier)
+}
+
+@Composable
+fun SkillFilterChips(
     studentSkills: Set<String>,
     onlyMatching: Boolean,
     onSkillToggle: (String) -> Unit,
@@ -31,9 +45,10 @@ fun SkillFilterSection(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .border(1.dp, DarkBorder, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        color = DarkSurface,
         tonalElevation = 1.dp
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -43,8 +58,13 @@ fun SkillFilterSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🎯", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.Outlined.Tune,
+                        contentDescription = null,
+                        tint = PrimaryGreen,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
                             text = "Smart Skill Matcher",
@@ -64,13 +84,12 @@ fun SkillFilterSection(
                         onClick = { isExpanded = !isExpanded },
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Tune,
-                            contentDescription = "Customize Skills",
-                            modifier = Modifier.size(16.dp)
+                        Text(
+                            text = if (isExpanded) "Hide" else "Customize",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = PrimaryGreen,
+                            fontWeight = FontWeight.SemiBold
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(if (isExpanded) "Hide" else "Customize", style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
@@ -86,7 +105,6 @@ fun SkillFilterSection(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // Horizontal scrollable skill chips
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -101,7 +119,8 @@ fun SkillFilterSection(
                                 label = {
                                     Text(
                                         text = skill.name,
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                     )
                                 },
                                 leadingIcon = if (isSelected) {
@@ -115,9 +134,9 @@ fun SkillFilterSection(
                                 } else null,
                                 shape = RoundedCornerShape(12.dp),
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = PrimaryBlue.copy(alpha = 0.9f),
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                                    selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary
+                                    selectedContainerColor = PrimaryGreen,
+                                    selectedLabelColor = Color(0xFF071206),
+                                    selectedLeadingIconColor = Color(0xFF071206)
                                 )
                             )
                         }
@@ -125,7 +144,6 @@ fun SkillFilterSection(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Toggle: Only show matching roles
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -138,7 +156,11 @@ fun SkillFilterSection(
                         )
                         Switch(
                             checked = onlyMatching,
-                            onCheckedChange = onOnlyMatchingToggle
+                            onCheckedChange = onOnlyMatchingToggle,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color(0xFF071206),
+                                checkedTrackColor = PrimaryGreen
+                            )
                         )
                     }
                 }

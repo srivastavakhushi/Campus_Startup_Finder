@@ -1,47 +1,26 @@
 package com.campus.startup.features.matching.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.campus.startup.core.theme.PrimaryBlue
-import com.campus.startup.core.theme.StartupGreen
+import com.campus.startup.core.components.ModernAvatar
+import com.campus.startup.core.theme.*
 import com.campus.startup.features.matching.data.model.ConnectionStatus
 import com.campus.startup.features.matching.data.model.DiscoverableProfile
 import com.campus.startup.features.matching.data.model.personLabel
@@ -64,18 +43,23 @@ fun CofounderDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Student profile", style = MaterialTheme.typography.titleMedium) },
+                title = { Text("Candidate Profile", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = DarkTextPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = DarkTextPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface)
             )
         },
         bottomBar = {
             if (student != null) {
-                Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 8.dp, shadowElevation = 8.dp) {
+                Surface(
+                    color = DarkSurface,
+                    tonalElevation = 8.dp,
+                    shadowElevation = 8.dp,
+                    border = BorderStroke(1.dp, DarkBorder)
+                ) {
                     Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         DetailConnectionButton(
                             student = student,
@@ -90,7 +74,7 @@ fun CofounderDetailScreen(
         when (val state = uiState) {
             is MatchingUiState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryBlue)
+                    CircularProgressIndicator(color = PrimaryGreen)
                 }
             }
             is MatchingUiState.Error -> {
@@ -103,12 +87,12 @@ fun CofounderDetailScreen(
                 if (person == null) {
                     Box(modifier = Modifier.fillMaxSize().padding(padding).padding(32.dp), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "This profile isn't available.", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(text = "This profile isn't available.", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = DarkTextPrimary)
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "It may have been removed from the campus directory.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = DarkTextSecondary
                             )
                         }
                     }
@@ -131,41 +115,39 @@ private fun ProfileBody(student: DiscoverableProfile, modifier: Modifier = Modif
             .padding(bottom = 24.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Surface(
-                modifier = Modifier.size(64.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(text = profile.avatar, style = MaterialTheme.typography.headlineMedium)
-                }
-            }
-            Spacer(modifier = Modifier.size(12.dp))
+            ModernAvatar(
+                name = profile.name,
+                role = profile.preferredRole,
+                size = 64.dp,
+                showActiveIndicator = true
+            )
+            Spacer(modifier = Modifier.size(14.dp))
             Column {
-                Text(text = profile.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text(text = profile.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = DarkTextPrimary)
                 if (profile.academicLine.isNotBlank()) {
                     Text(
                         text = profile.academicLine,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = DarkTextSecondary
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            InfoPill("${profile.preferredRole.emoji} ${profile.preferredRole.personLabel()}")
-            InfoPill("${profile.teamPreference.emoji} ${profile.teamPreference.displayName}")
+        Spacer(modifier = Modifier.height(14.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            InfoPill(profile.preferredRole.personLabel(), isAccent = true)
+            InfoPill(profile.teamPreference.displayName)
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+            color = Color(0xFF102415),
+            border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.4f))
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
-                Text(text = "Why this match", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text(text = "Compatibility Analysis", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = PrimaryGreen)
                 Spacer(modifier = Modifier.height(8.dp))
                 CompatibilityBadge(match = student.match)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -173,52 +155,65 @@ private fun ProfileBody(student: DiscoverableProfile, modifier: Modifier = Modif
                     Text(
                         text = "• $reason",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = Color(0xFFD1FAE5),
                         modifier = Modifier.padding(vertical = 2.dp)
                     )
                 }
             }
         }
 
-        SectionTitle("Skills")
+        SectionTitle("Complementary Skills")
         if (profile.skills.isEmpty()) {
             EmptyLine("No skills listed.")
         } else {
             WrappingTags(profile.skills, student.match.complementarySkills)
         }
 
-        SectionTitle("Interests")
+        SectionTitle("Startup Interests")
         if (profile.interests.isEmpty()) {
             EmptyLine("No interests listed.")
         } else {
             WrappingTags(profile.interests, student.match.sharedInterests)
         }
 
-        SectionTitle("Startup areas")
+        SectionTitle("Domain Focus")
         if (profile.areasOfInterest.isEmpty()) {
             EmptyLine("No startup areas listed.")
         } else {
             WrappingTags(profile.areasOfInterest, student.match.sharedInterests)
         }
 
-        SectionTitle("Experience")
-        if (profile.experienceTags.isNotEmpty()) {
-            WrappingTags(profile.experienceTags, student.match.sharedExperience)
-            Spacer(modifier = Modifier.height(8.dp))
+        SectionTitle("Track Record & Experience")
+        if (profile.experience.isBlank() && profile.experienceTags.isEmpty()) {
+            EmptyLine("No experience notes added yet.")
+        } else {
+            if (profile.experienceTags.isNotEmpty()) {
+                WrappingTags(profile.experienceTags, student.match.sharedExperience)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            if (profile.experience.isNotBlank()) {
+                Text(text = profile.experience, style = MaterialTheme.typography.bodyMedium, color = DarkTextPrimary)
+            }
         }
-        Text(
-            text = profile.experience.ifBlank { "No experience written yet." },
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
 
-        SectionTitle("Entrepreneurial goals")
-        Text(
-            text = profile.goals.ifBlank { "No goals written yet." },
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        SectionTitle("Entrepreneurial Goals")
+        if (profile.goals.isBlank()) {
+            EmptyLine("No goals stated yet.")
+        } else {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = DarkSurfaceVariant,
+                border = BorderStroke(1.dp, DarkBorder),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "\"${profile.goals}\"",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = DarkTextPrimary,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
     }
 }
 
@@ -232,41 +227,55 @@ private fun DetailConnectionButton(
         ConnectionStatus.NONE -> {
             Button(
                 onClick = onConnect,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(14.dp)
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color(0xFF071206))
             ) {
-                Text("Send Request", fontWeight = FontWeight.Bold)
+                Text("Send Co-founder Request", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             }
         }
         ConnectionStatus.PENDING_OUTGOING -> {
             OutlinedButton(
                 onClick = {},
                 enabled = false,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(14.dp)
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                border = BorderStroke(1.dp, DarkBorder)
             ) {
-                Text("Request Pending", fontWeight = FontWeight.Bold)
+                Text("Connection Request Pending", style = MaterialTheme.typography.labelLarge)
             }
         }
         ConnectionStatus.PENDING_INCOMING -> {
             Button(
                 onClick = onAccept,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(14.dp)
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen, contentColor = Color(0xFF071206))
             ) {
-                Text("Accept Request", fontWeight = FontWeight.Bold)
+                Text("Accept Connection Request", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             }
         }
         ConnectionStatus.ACCEPTED -> {
-            Button(
-                onClick = {},
-                enabled = false,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(14.dp)
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = PrimaryGreenContainer,
+                border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.4f)),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(Icons.Default.Check, contentDescription = null, tint = StartupGreen)
-                Spacer(modifier = Modifier.size(6.dp))
-                Text("Connected", fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = PrimaryGreen, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Connected in Co-founder Network",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryGreen
+                    )
+                }
             }
         }
     }
@@ -274,24 +283,29 @@ private fun DetailConnectionButton(
 
 @Composable
 private fun SectionTitle(text: String) {
-    Spacer(modifier = Modifier.height(16.dp))
-    Text(text = text, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+    Spacer(modifier = Modifier.height(18.dp))
+    Text(text = text, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = DarkTextPrimary)
     Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable
 private fun EmptyLine(text: String) {
-    Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(text = text, style = MaterialTheme.typography.bodyMedium, color = DarkTextMuted)
 }
 
 @Composable
-private fun InfoPill(text: String) {
-    Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)) {
+private fun InfoPill(text: String, isAccent: Boolean = false) {
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = if (isAccent) PrimaryGreenContainer else DarkSurfaceVariant,
+        border = BorderStroke(1.dp, if (isAccent) PrimaryGreen.copy(alpha = 0.4f) else DarkBorder)
+    ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            color = if (isAccent) PrimaryGreen else DarkTextSecondary,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
         )
     }
 }
@@ -306,15 +320,24 @@ private fun WrappingTags(tags: List<String>, highlighted: List<String>) {
             val isHighlighted = highlighted.any { it.equals(tag, ignoreCase = true) }
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = if (isHighlighted) StartupGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                color = if (isHighlighted) PrimaryGreenContainer else DarkSurfaceVariant,
+                border = BorderStroke(1.dp, if (isHighlighted) PrimaryGreen.copy(alpha = 0.5f) else DarkBorder)
             ) {
-                Text(
-                    text = if (isHighlighted) "✓ $tag" else tag,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isHighlighted) StartupGreen else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isHighlighted) {
+                        Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = PrimaryGreen, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
+                    Text(
+                        text = tag,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isHighlighted) PrimaryGreen else DarkTextSecondary
+                    )
+                }
             }
         }
     }

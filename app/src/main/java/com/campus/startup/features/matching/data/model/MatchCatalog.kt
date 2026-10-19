@@ -9,7 +9,7 @@ import com.campus.startup.features.recruitment.data.model.StartupRoleCategory
 object MatchCatalog {
     const val CURRENT_USER_ID = "profile_me"
 
-    val AVATARS = listOf("🎓", "💻", "🎨", "📢", "🚀", "🤖", "🌱", "📱", "🧠", "✏️")
+    val AVATARS = listOf("DEV", "DES", "MKT", "OPS", "AI", "PM", "BIZ", "LEAD")
 
     val YEARS = listOf("1st Year", "2nd Year", "3rd Year", "4th Year", "Postgraduate")
 

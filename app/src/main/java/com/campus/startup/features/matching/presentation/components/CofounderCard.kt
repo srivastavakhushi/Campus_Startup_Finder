@@ -1,9 +1,9 @@
 package com.campus.startup.features.matching.presentation.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -30,13 +30,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.campus.startup.core.theme.PrimaryBlue
-import com.campus.startup.core.theme.StartupGreen
+import com.campus.startup.core.components.ModernAvatar
+import com.campus.startup.core.theme.DarkBorder
+import com.campus.startup.core.theme.DarkSurface
+import com.campus.startup.core.theme.PrimaryGreen
+import com.campus.startup.core.theme.PrimaryGreenContainer
 import com.campus.startup.features.matching.data.model.ConnectionStatus
 import com.campus.startup.features.matching.data.model.DiscoverableProfile
 import com.campus.startup.features.matching.data.model.personLabel
@@ -58,8 +60,9 @@ fun CofounderCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 7.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        border = BorderStroke(1.dp, DarkBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -67,14 +70,13 @@ fun CofounderCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    modifier = Modifier.size(46.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    BoxCenter(profile.avatar)
-                }
-                Spacer(modifier = Modifier.width(10.dp))
+                ModernAvatar(
+                    name = profile.name,
+                    role = profile.preferredRole,
+                    size = 48.dp,
+                    showActiveIndicator = true
+                )
+                Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = profile.name,
@@ -104,9 +106,12 @@ fun CofounderCard(
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Surface(shape = RoundedCornerShape(8.dp), color = roleColors.first) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = roleColors.first
+                ) {
                     Text(
-                        text = "${profile.preferredRole.emoji} ${profile.preferredRole.personLabel()}",
+                        text = profile.preferredRole.personLabel(),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = roleColors.second,
@@ -118,7 +123,7 @@ fun CofounderCard(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
                 ) {
                     Text(
-                        text = "${profile.teamPreference.emoji} ${profile.teamPreference.displayName}",
+                        text = profile.teamPreference.displayName,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -127,7 +132,7 @@ fun CofounderCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             CompatibilityBadge(match = student.match)
             student.match.reasons.firstOrNull()?.let { reason ->
                 Spacer(modifier = Modifier.height(6.dp))
@@ -141,7 +146,7 @@ fun CofounderCard(
             }
 
             if (profile.skills.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 TagRow(
                     tags = profile.skills,
                     highlighted = student.match.complementarySkills.toSet()
@@ -153,12 +158,12 @@ fun CofounderCard(
                 TagRow(
                     tags = (profile.interests + profile.areasOfInterest).distinct(),
                     highlighted = student.match.sharedInterests.toSet(),
-                    highlightColor = PrimaryBlue
+                    highlightColor = PrimaryGreen
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+            HorizontalDivider(color = DarkBorder)
             Spacer(modifier = Modifier.height(8.dp))
 
             if (profile.experience.isNotBlank()) {
@@ -185,20 +190,10 @@ fun CofounderCard(
 }
 
 @Composable
-private fun BoxCenter(emoji: String) {
-    Box(
-        modifier = Modifier.size(46.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = emoji, style = MaterialTheme.typography.titleMedium)
-    }
-}
-
-@Composable
 private fun TagRow(
     tags: List<String>,
     highlighted: Set<String>,
-    highlightColor: Color = StartupGreen
+    highlightColor: Color = PrimaryGreen
 ) {
     Row(
         modifier = Modifier
@@ -209,19 +204,20 @@ private fun TagRow(
         tags.forEach { tag ->
             val isHighlighted = highlighted.any { it.equals(tag, ignoreCase = true) }
             Surface(
-                shape = RoundedCornerShape(6.dp),
+                shape = RoundedCornerShape(8.dp),
                 color = if (isHighlighted) {
-                    highlightColor.copy(alpha = 0.15f)
+                    PrimaryGreenContainer
                 } else {
                     MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                }
+                },
+                border = if (isHighlighted) BorderStroke(1.dp, highlightColor.copy(alpha = 0.4f)) else null
             ) {
                 Text(
-                    text = if (isHighlighted) "✓ $tag" else tag,
+                    text = tag,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
                     color = if (isHighlighted) highlightColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                 )
             }
         }
@@ -239,9 +235,13 @@ private fun ConnectionAction(
             Button(
                 onClick = onConnect,
                 shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PrimaryGreen,
+                    contentColor = Color(0xFF071206)
+                ),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
             ) {
-                Text("Connect", style = MaterialTheme.typography.labelLarge)
+                Text("Connect", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             }
         }
         ConnectionStatus.PENDING_OUTGOING -> {
@@ -249,6 +249,7 @@ private fun ConnectionAction(
                 onClick = {},
                 enabled = false,
                 shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, DarkBorder),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text("Pending", style = MaterialTheme.typography.labelLarge)
@@ -258,13 +259,21 @@ private fun ConnectionAction(
             Button(
                 onClick = onAccept,
                 shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PrimaryGreen,
+                    contentColor = Color(0xFF071206)
+                ),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
             ) {
-                Text("Accept", style = MaterialTheme.typography.labelLarge)
+                Text("Accept", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             }
         }
         ConnectionStatus.ACCEPTED -> {
-            Surface(shape = RoundedCornerShape(12.dp), color = StartupGreen.copy(alpha = 0.15f)) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = PrimaryGreenContainer,
+                border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.4f))
+            ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -272,7 +281,7 @@ private fun ConnectionAction(
                     Icon(
                         imageVector = Icons.Filled.Check,
                         contentDescription = null,
-                        tint = StartupGreen,
+                        tint = PrimaryGreen,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -280,7 +289,7 @@ private fun ConnectionAction(
                         text = "Connected",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = StartupGreen
+                        color = PrimaryGreen
                     )
                 }
             }
@@ -289,9 +298,9 @@ private fun ConnectionAction(
 }
 
 private fun roleColors(role: StartupRoleCategory): Pair<Color, Color> = when (role) {
-    StartupRoleCategory.DEVELOPER -> Color(0xFFEFF6FF) to Color(0xFF1D4ED8)
-    StartupRoleCategory.DESIGNER -> Color(0xFFFAF5FF) to Color(0xFF7E22CE)
-    StartupRoleCategory.MARKETER -> Color(0xFFFFFBEB) to Color(0xFFB45309)
-    StartupRoleCategory.INTERN -> Color(0xFFECFDF5) to Color(0xFF047857)
-    StartupRoleCategory.ALL -> Color(0xFFF1F5F9) to Color(0xFF334155)
+    StartupRoleCategory.DEVELOPER -> Color(0xFF132238) to Color(0xFF38BDF8)
+    StartupRoleCategory.DESIGNER -> Color(0xFF281834) to Color(0xFFC084FC)
+    StartupRoleCategory.MARKETER -> Color(0xFF2C2210) to Color(0xFFFBBF24)
+    StartupRoleCategory.INTERN -> PrimaryGreenContainer to PrimaryGreen
+    StartupRoleCategory.ALL -> Color(0xFF1E242B) to Color(0xFF94A3B8)
 }

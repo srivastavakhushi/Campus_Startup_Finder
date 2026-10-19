@@ -34,7 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.campus.startup.core.theme.PrimaryBlue
+import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.features.matching.data.model.MatchCatalog
 import com.campus.startup.features.recruitment.data.model.SkillItem
 
@@ -70,8 +70,13 @@ fun MatchFilterSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                    Text(text = "🎯", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.Default.Tune,
+                        contentDescription = null,
+                        tint = PrimaryGreen,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
                             text = "Complementary filters",
@@ -86,9 +91,12 @@ fun MatchFilterSection(
                     }
                 }
                 TextButton(onClick = { expanded = !expanded }, contentPadding = PaddingValues(horizontal = 8.dp)) {
-                    Icon(Icons.Default.Tune, contentDescription = "Filters", modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(if (expanded) "Hide" else "Filters", style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        text = if (expanded) "Hide" else "Filters",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = com.campus.startup.core.theme.PrimaryGreen,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
 
@@ -195,9 +203,9 @@ private fun ChipRow(
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = PrimaryBlue.copy(alpha = 0.9f),
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                    selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary
+                    selectedContainerColor = com.campus.startup.core.theme.PrimaryGreen,
+                    selectedLabelColor = androidx.compose.ui.graphics.Color(0xFF071206),
+                    selectedLeadingIconColor = androidx.compose.ui.graphics.Color(0xFF071206)
                 )
             )
         }

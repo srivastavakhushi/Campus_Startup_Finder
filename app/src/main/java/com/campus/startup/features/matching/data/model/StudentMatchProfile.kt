@@ -5,7 +5,7 @@ import com.campus.startup.features.recruitment.data.model.StartupRoleCategory
 data class StudentMatchProfile(
     val id: String,
     val name: String,
-    val avatar: String = "🎓",
+    val avatar: String = "DEV",
     val branch: String = "",
     val year: String = "",
     val college: String = "",

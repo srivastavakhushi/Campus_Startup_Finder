@@ -106,7 +106,7 @@ class MatchingRepository(
         return StudentMatchProfile(
             id = id,
             name = name,
-            avatar = avatar.ifBlank { "🎓" },
+            avatar = avatar.ifBlank { "ME" },
             branch = branch,
             year = year,
             college = college,
@@ -127,7 +127,7 @@ class MatchingRepository(
         return StudentProfileEntity(
             id = id,
             name = name.trim(),
-            avatar = avatar.ifBlank { fallbackAvatar ?: "🎓" },
+            avatar = avatar.ifBlank { fallbackAvatar ?: "ME" },
             branch = branch.trim(),
             year = year.trim(),
             college = college.trim(),
@@ -165,7 +165,7 @@ class MatchingRepository(
         return StudentProfileEntity(
             id = MatchCatalog.CURRENT_USER_ID,
             name = "",
-            avatar = "🎓",
+            avatar = "ME",
             branch = "",
             year = "",
             college = "",
@@ -190,7 +190,7 @@ class MatchingRepository(
             sample(
                 id = "student_aisha",
                 name = "Aisha Rahman",
-                avatar = "🎨",
+                avatar = "AR",
                 branch = "Design",
                 year = "3rd Year",
                 skills = "Figma, UI/UX Design, Prototyping",
@@ -205,7 +205,7 @@ class MatchingRepository(
             sample(
                 id = "student_rohan",
                 name = "Rohan Verma",
-                avatar = "🤖",
+                avatar = "RV",
                 branch = "CSE",
                 year = "4th Year",
                 skills = "Python, AI & LLMs, Firebase / SQL",
@@ -220,7 +220,7 @@ class MatchingRepository(
             sample(
                 id = MEERA_ID,
                 name = "Meera Iyer",
-                avatar = "📢",
+                avatar = "MI",
                 branch = "Management",
                 year = "2nd Year",
                 skills = "Growth Marketing, Campus Outreach, Community Building",
@@ -235,7 +235,7 @@ class MatchingRepository(
             sample(
                 id = "student_kabir",
                 name = "Kabir Shah",
-                avatar = "💻",
+                avatar = "KS",
                 branch = "CSE",
                 year = "3rd Year",
                 skills = "Kotlin, Jetpack Compose, Firebase / SQL",
@@ -250,7 +250,7 @@ class MatchingRepository(
             sample(
                 id = "student_ananya",
                 name = "Ananya Sen",
-                avatar = "🌱",
+                avatar = "AS",
                 branch = "Mechanical",
                 year = "3rd Year",
                 skills = "Product Management, Operations, Market Research",
@@ -265,7 +265,7 @@ class MatchingRepository(
             sample(
                 id = "student_dev",
                 name = "Dev Patel",
-                avatar = "📱",
+                avatar = "DP",
                 branch = "IT",
                 year = "2nd Year",
                 skills = "Flutter, Node.js / Express, React / Next.js",
@@ -280,7 +280,7 @@ class MatchingRepository(
             sample(
                 id = "student_sara",
                 name = "Sara Khan",
-                avatar = "✏️",
+                avatar = "SK",
                 branch = "Design",
                 year = "2nd Year",
                 skills = "Graphic Design, Canva & Adobe Suite, Content Writing",
@@ -295,7 +295,7 @@ class MatchingRepository(
             sample(
                 id = "student_arjun",
                 name = "Arjun Nair",
-                avatar = "💼",
+                avatar = "AN",
                 branch = "Commerce",
                 year = "4th Year",
                 skills = "Sales & Pitching, Market Research, Growth Marketing",

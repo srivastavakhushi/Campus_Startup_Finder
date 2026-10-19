@@ -65,12 +65,23 @@ fun OpportunityCard(
                         .background(typeBg)
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text(
-                        text = "${opportunity.type.emoji} ${opportunity.type.displayName}",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = typeText
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = opportunity.type.getIcon(),
+                            contentDescription = null,
+                            tint = typeText,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = opportunity.type.displayName,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = typeText
+                        )
+                    }
                 }
 
                 IconButton(
