@@ -7,8 +7,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -26,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.campus.startup.core.components.StartupBadgeLogo
 import com.campus.startup.core.theme.PrimaryBlue
 import com.campus.startup.core.theme.StartupGreen
 import com.campus.startup.features.recruitment.data.model.StartupOpening
@@ -58,7 +61,7 @@ fun OpeningDetailScreen(
                 title = { Text("Startup Opening", style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -105,7 +108,7 @@ fun OpeningDetailScreen(
                             )
                         ) {
                             Text(
-                                text = if (hasApplied) "Applied (Under Review) ✓" else "Quick Apply to Founder 🚀",
+                                text = if (hasApplied) "Application Submitted" else "Quick Apply to Founder",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -134,17 +137,12 @@ fun OpeningDetailScreen(
             ) {
                 // Header Startup Info
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(54.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = opening.startupLogo, style = MaterialTheme.typography.headlineMedium)
-                    }
+                    StartupBadgeLogo(
+                        startupName = opening.startupName,
+                        size = 54.dp
+                    )
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
 
                     Column {
                         Text(
@@ -177,13 +175,24 @@ fun OpeningDetailScreen(
                         shape = RoundedCornerShape(8.dp),
                         color = MaterialTheme.colorScheme.primaryContainer
                     ) {
-                        Text(
-                            text = "${opening.roleCategory.emoji} ${opening.roleCategory.displayName}",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = opening.roleCategory.getIcon(),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = opening.roleCategory.displayName,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
 
                     Surface(
@@ -314,13 +323,26 @@ fun OpeningDetailScreen(
                             shape = RoundedCornerShape(8.dp),
                             color = if (isMatched) StartupGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant
                         ) {
-                            Text(
-                                text = if (isMatched) "✓ $skill (Matched)" else skill,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (isMatched) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isMatched) StartupGreen else MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                if (isMatched) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = StartupGreen,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                                Text(
+                                    text = if (isMatched) "$skill (Matched)" else skill,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = if (isMatched) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isMatched) StartupGreen else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 }
@@ -381,7 +403,15 @@ fun OpeningDetailScreen(
                                 .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.Top
                         ) {
-                            Text(text = "🎁", modifier = Modifier.padding(end = 8.dp))
+                            Icon(
+                                imageVector = Icons.Default.CardGiftcard,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .padding(top = 2.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = perk,
                                 style = MaterialTheme.typography.bodyMedium,

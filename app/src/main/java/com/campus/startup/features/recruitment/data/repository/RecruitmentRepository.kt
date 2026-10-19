@@ -21,7 +21,7 @@ class RecruitmentRepository(
                 StartupOpeningEntity(
                     id = "rec_dev_1",
                     startupName = "CampusBites",
-                    startupLogo = "🍔",
+                    startupLogo = "CB",
                     startupStage = "Incubated in Lab 2 • Pre-Seed",
                     title = "Founding Android / Jetpack Compose Engineer",
                     roleCategoryName = StartupRoleCategory.DEVELOPER.name,
@@ -43,7 +43,7 @@ class RecruitmentRepository(
                 StartupOpeningEntity(
                     id = "rec_dev_2",
                     startupName = "StudyGenie AI",
-                    startupLogo = "⚡",
+                    startupLogo = "SG",
                     startupStage = "Student MVP • 2,500 Active Users",
                     title = "AI & Backend Engineer (Python / LLMs)",
                     roleCategoryName = StartupRoleCategory.DEVELOPER.name,
@@ -65,7 +65,7 @@ class RecruitmentRepository(
                 StartupOpeningEntity(
                     id = "rec_des_1",
                     startupName = "CampusConnect",
-                    startupLogo = "🎨",
+                    startupLogo = "CC",
                     startupStage = "College E-Cell Backed",
                     title = "Lead UI/UX & Product Designer",
                     roleCategoryName = StartupRoleCategory.DESIGNER.name,
@@ -87,7 +87,7 @@ class RecruitmentRepository(
                 StartupOpeningEntity(
                     id = "rec_des_2",
                     startupName = "EcoCampus Goods",
-                    startupLogo = "🌱",
+                    startupLogo = "EG",
                     startupStage = "Green Innovation Grant Winner",
                     title = "Brand & Graphic Designer",
                     roleCategoryName = StartupRoleCategory.DESIGNER.name,
@@ -109,7 +109,7 @@ class RecruitmentRepository(
                 StartupOpeningEntity(
                     id = "rec_mkt_1",
                     startupName = "PeerTutor Network",
-                    startupLogo = "📢",
+                    startupLogo = "PT",
                     startupStage = "Early Traction • 1,200 Bookings",
                     title = "Growth Marketer & Campus Evangelist",
                     roleCategoryName = StartupRoleCategory.MARKETER.name,
@@ -131,7 +131,7 @@ class RecruitmentRepository(
                 StartupOpeningEntity(
                     id = "rec_mkt_2",
                     startupName = "FestPass Live",
-                    startupLogo = "🎟️",
+                    startupLogo = "FP",
                     startupStage = "Official College Fest Partner",
                     title = "Social Media Lead & Content Creator",
                     roleCategoryName = StartupRoleCategory.MARKETER.name,
@@ -153,7 +153,7 @@ class RecruitmentRepository(
                 StartupOpeningEntity(
                     id = "rec_int_1",
                     startupName = "HostelMate IoT",
-                    startupLogo = "🧺",
+                    startupLogo = "HM",
                     startupStage = "Prototype Stage • Hardware + App",
                     title = "IoT & Flutter Software Intern",
                     roleCategoryName = StartupRoleCategory.INTERN.name,
@@ -175,7 +175,7 @@ class RecruitmentRepository(
                 StartupOpeningEntity(
                     id = "rec_int_2",
                     startupName = "CampusStore Exchange",
-                    startupLogo = "📚",
+                    startupLogo = "CS",
                     startupStage = "Bootstrapped Student Team",
                     title = "Product Management & Operations Intern",
                     roleCategoryName = StartupRoleCategory.INTERN.name,
@@ -241,7 +241,7 @@ class RecruitmentRepository(
         val entity = StartupOpeningEntity(
             id = "opening_" + UUID.randomUUID().toString().take(8),
             startupName = startupName,
-            startupLogo = startupLogo.ifBlank { "🚀" },
+            startupLogo = startupLogo.ifBlank { "CS" },
             startupStage = startupStage.ifBlank { "Campus Startup" },
             title = title,
             roleCategoryName = roleCategory.name,

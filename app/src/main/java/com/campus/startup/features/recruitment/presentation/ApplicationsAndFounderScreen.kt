@@ -8,10 +8,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Assignment
@@ -26,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.campus.startup.core.theme.PrimaryBlue
@@ -45,7 +48,7 @@ fun ApplicationsAndFounderScreen(
     onOpeningClick: (String) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("My Applications 📋", "Saved Roles 🔖", "Founder Portal 💼")
+    val tabs = listOf("My Applications", "Saved Roles", "Founder Portal")
 
     val applications by viewModel.allApplications.collectAsState()
     val savedOpenings by viewModel.savedOpenings.collectAsState()
@@ -57,7 +60,7 @@ fun ApplicationsAndFounderScreen(
                 title = { Text("Recruitment & Applications", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -96,7 +99,7 @@ fun ApplicationsAndFounderScreen(
                     // 1. My Applications
                     if (applications.isEmpty()) {
                         EmptyStateView(
-                            emoji = "📝",
+                            icon = Icons.AutoMirrored.Outlined.Assignment,
                             title = "No applications submitted yet",
                             subtitle = "Find startup roles that match your skills and apply in 1 tap!"
                         )
@@ -116,7 +119,7 @@ fun ApplicationsAndFounderScreen(
                     // 2. Saved Roles
                     if (savedOpenings.isEmpty()) {
                         EmptyStateView(
-                            emoji = "🔖",
+                            icon = Icons.Outlined.BookmarkBorder,
                             title = "No saved openings",
                             subtitle = "Bookmark startup openings you are interested in to review them here."
                         )
@@ -249,7 +252,7 @@ private fun FounderPortalView(
 ) {
     if (myOpenings.isEmpty()) {
         EmptyStateView(
-            emoji = "💼",
+            icon = Icons.Outlined.BusinessCenter,
             title = "No openings posted yet",
             subtitle = "Founders can post roles for developers, designers, marketers, and interns using the '+ Post Opening' button on the Recruitment tab!"
         )
@@ -416,7 +419,7 @@ private fun FounderApplicantCard(
 
 @Composable
 private fun EmptyStateView(
-    emoji: String,
+    icon: ImageVector,
     title: String,
     subtitle: String
 ) {
@@ -427,8 +430,13 @@ private fun EmptyStateView(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = emoji, style = MaterialTheme.typography.headlineLarge)
-            Spacer(modifier = Modifier.height(10.dp))
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(56.dp)
+            )
+            Spacer(modifier = Modifier.height(14.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,

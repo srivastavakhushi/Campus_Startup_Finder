@@ -6,10 +6,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MonetizationOn
@@ -45,7 +46,7 @@ fun OpportunityDetailScreen(
                 title = { Text("Opportunity Details", style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -90,7 +91,7 @@ fun OpportunityDetailScreen(
                             enabled = !hasApplied
                         ) {
                             Text(
-                                text = if (hasApplied) "Applied (Under Review) ✓" else "Apply Now 🚀",
+                                text = if (hasApplied) "Application Submitted" else "Apply Now",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -122,13 +123,24 @@ fun OpportunityDetailScreen(
                     shape = RoundedCornerShape(8.dp),
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
-                    Text(
-                        text = "${opportunity.type.emoji} ${opportunity.type.displayName}",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = opportunity.type.getIcon(),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = opportunity.type.displayName,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -250,7 +262,14 @@ fun OpportunityDetailScreen(
                                 .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.Top
                         ) {
-                            Text(text = "⭐", modifier = Modifier.padding(top = 1.dp))
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .padding(top = 2.dp)
+                            )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = perk,

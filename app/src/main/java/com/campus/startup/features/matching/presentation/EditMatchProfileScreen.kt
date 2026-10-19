@@ -15,7 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -63,7 +63,7 @@ fun EditMatchProfileScreen(
 
     var ready by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
-    var avatar by remember { mutableStateOf("🎓") }
+    var avatar by remember { mutableStateOf("DEV") }
     var branch by remember { mutableStateOf("") }
     var year by remember { mutableStateOf("") }
     var college by remember { mutableStateOf("") }
@@ -79,7 +79,7 @@ fun EditMatchProfileScreen(
     LaunchedEffect(me?.id, uiState is MatchingUiState.Success) {
         if (!ready && me != null) {
             name = me.name
-            avatar = me.avatar.ifBlank { "🎓" }
+            avatar = me.avatar.ifBlank { "DEV" }
             branch = me.branch
             year = me.year
             college = me.college
@@ -117,7 +117,7 @@ fun EditMatchProfileScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -179,23 +179,22 @@ fun EditMatchProfileScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Text("Profile image", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                Text("Profile badge tag", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    MatchCatalog.AVATARS.forEach { emoji ->
-                        Button(
-                            onClick = { avatar = emoji },
+                    MatchCatalog.AVATARS.forEach { badge ->
+                        FilterChip(
+                            selected = avatar == badge,
+                            onClick = { avatar = badge },
+                            label = { Text(badge, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium) },
                             shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (avatar == emoji) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = if (avatar == emoji) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = PrimaryBlue,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                             )
-                        ) {
-                            Text(emoji, style = MaterialTheme.typography.titleMedium)
-                        }
+                        )
                     }
                 }
 
@@ -241,10 +240,10 @@ fun EditMatchProfileScreen(
 
                 SectionLabel("Preferred role *")
                 ChoiceRow(
-                    labels = MatchCatalog.ROLES.map { "${it.emoji} ${it.personLabel()}" },
-                    selected = "${role.emoji} ${role.personLabel()}",
+                    labels = MatchCatalog.ROLES.map { it.personLabel() },
+                    selected = role.personLabel(),
                     onSelected = { label ->
-                        role = MatchCatalog.ROLES.first { "${it.emoji} ${it.personLabel()}" == label }
+                        role = MatchCatalog.ROLES.first { it.personLabel() == label }
                     }
                 )
                 errors.role?.let { message ->
@@ -253,10 +252,10 @@ fun EditMatchProfileScreen(
 
                 SectionLabel("Team you want to join *")
                 ChoiceRow(
-                    labels = TeamPreference.values().map { "${it.emoji} ${it.displayName}" },
-                    selected = "${team.emoji} ${team.displayName}",
+                    labels = TeamPreference.values().map { it.displayName },
+                    selected = team.displayName,
                     onSelected = { label ->
-                        team = TeamPreference.values().first { "${it.emoji} ${it.displayName}" == label }
+                        team = TeamPreference.values().first { it.displayName == label }
                     }
                 )
 

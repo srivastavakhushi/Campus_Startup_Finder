@@ -3,7 +3,7 @@ package com.campus.startup.features.recruitment.data.model
 data class StartupOpening(
     val id: String,
     val startupName: String,
-    val startupLogo: String = "🚀",
+    val startupLogo: String = "CS",
     val startupStage: String,
     val title: String,
     val roleCategory: StartupRoleCategory,

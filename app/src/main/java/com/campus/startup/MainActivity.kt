@@ -6,11 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material.icons.outlined.School
@@ -28,6 +28,10 @@ import androidx.navigation.navArgument
 import com.campus.startup.core.database.AppDatabase
 import com.campus.startup.core.navigation.Screen
 import com.campus.startup.core.theme.CampusStartupFinderTheme
+import com.campus.startup.core.theme.DarkBorder
+import com.campus.startup.core.theme.DarkSurface
+import com.campus.startup.core.theme.PrimaryGreen
+import com.campus.startup.core.theme.PrimaryGreenContainer
 import com.campus.startup.features.matching.data.repository.MatchingRepository
 import com.campus.startup.features.matching.presentation.CofounderDetailScreen
 import com.campus.startup.features.matching.presentation.CofounderMatchingScreen
@@ -92,8 +96,8 @@ class MainActivity : ComponentActivity() {
                 BottomNavItem(
                     title = "Applications",
                     route = Screen.ApplicationsAndFounder.route,
-                    selectedIcon = Icons.Filled.Assignment,
-                    unselectedIcon = Icons.Outlined.Assignment
+                    selectedIcon = Icons.AutoMirrored.Filled.Assignment,
+                    unselectedIcon = Icons.AutoMirrored.Outlined.Assignment
                 )
             )
 
@@ -139,7 +143,14 @@ class MainActivity : ComponentActivity() {
                                                 text = item.title,
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                             )
-                                        }
+                                        },
+                                        colors = NavigationBarItemDefaults.colors(
+                                            selectedIconColor = PrimaryGreen,
+                                            selectedTextColor = PrimaryGreen,
+                                            indicatorColor = PrimaryGreenContainer,
+                                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     )
                                 }
                             }
