@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.*
@@ -30,6 +32,11 @@ import com.campus.startup.features.opportunities.data.repository.OpportunityRepo
 import com.campus.startup.features.opportunities.presentation.*
 import com.campus.startup.features.recruitment.data.repository.RecruitmentRepository
 import com.campus.startup.features.recruitment.presentation.*
+import com.campus.startup.features.startupprofiles.data.repository.StartupRepository
+import com.campus.startup.features.startupprofiles.presentation.StartupProfilesViewModel
+import com.campus.startup.features.startupprofiles.presentation.StartupProfilesViewModelFactory
+import com.campus.startup.features.startupprofiles.presentation.StartupRoutes
+import com.campus.startup.features.startupprofiles.presentation.startupProfilesGraph
 
 class MainActivity : ComponentActivity() {
 
@@ -44,6 +51,9 @@ class MainActivity : ComponentActivity() {
         val oppViewModelFactory = OpportunitiesViewModelFactory(opportunityRepository)
         val recViewModelFactory = RecruitmentViewModelFactory(recruitmentRepository)
 
+        val startupRepository = StartupRepository(database.startupDao())
+        val startupViewModelFactory = StartupProfilesViewModelFactory(startupRepository)
+
         setContent {
             val oppViewModel: OpportunitiesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
                 factory = oppViewModelFactory
@@ -51,12 +61,21 @@ class MainActivity : ComponentActivity() {
             val recViewModel: RecruitmentViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
                 factory = recViewModelFactory
             )
+            val startupViewModel: StartupProfilesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                factory = startupViewModelFactory
+            )
 
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
 
             val bottomNavItems = listOf(
+                BottomNavItem(
+                    title = "Startups",
+                    route = StartupRoutes.LIST,
+                    selectedIcon = Icons.Filled.Business,
+                    unselectedIcon = Icons.Outlined.Business
+                ),
                 BottomNavItem(
                     title = "Recruitment",
                     route = Screen.Recruitment.route,
@@ -80,7 +99,8 @@ class MainActivity : ComponentActivity() {
             val showBottomBar = currentRoute in listOf(
                 Screen.Recruitment.route,
                 Screen.Feed.route,
-                Screen.ApplicationsAndFounder.route
+                Screen.ApplicationsAndFounder.route,
+                StartupRoutes.LIST
             )
 
             CampusStartupFinderTheme {
@@ -130,6 +150,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = Screen.Recruitment.route,
                         modifier = Modifier.padding(innerPadding)
                     ) {
+                        startupProfilesGraph(navController, startupViewModel)
                         // 1. Startup Recruitment Screen (Primary Landing)
                         composable(Screen.Recruitment.route) {
                             StartupRecruitmentScreen(

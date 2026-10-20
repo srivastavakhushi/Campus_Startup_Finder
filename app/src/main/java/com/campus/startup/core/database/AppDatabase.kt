@@ -9,12 +9,15 @@ import com.campus.startup.features.opportunities.data.local.OpportunityEntity
 import com.campus.startup.features.recruitment.data.local.JobApplicationEntity
 import com.campus.startup.features.recruitment.data.local.RecruitmentDao
 import com.campus.startup.features.recruitment.data.local.StartupOpeningEntity
+import com.campus.startup.features.startupprofiles.data.local.StartupDao
+import com.campus.startup.features.startupprofiles.data.model.StartupEntity
 
 @Database(
     entities = [
         OpportunityEntity::class,
         StartupOpeningEntity::class,
-        JobApplicationEntity::class
+        JobApplicationEntity::class,
+        StartupEntity::class
     ],
     version = 2,
     exportSchema = false
@@ -23,6 +26,8 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun opportunityDao(): OpportunityDao
     abstract fun recruitmentDao(): RecruitmentDao
+
+    abstract fun startupDao(): StartupDao
 
     companion object {
         @Volatile
