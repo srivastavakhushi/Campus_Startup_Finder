@@ -5,14 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.campus.startup.features.matching.data.model.DiscoverableProfile
 import com.campus.startup.features.matching.data.model.MatchCatalog
+import com.campus.startup.features.matching.data.model.MatchingDirectory
 import com.campus.startup.features.matching.data.model.MatchingFilters
 import com.campus.startup.features.matching.data.model.StudentMatchProfile
+import com.campus.startup.features.matching.data.model.resolveConnectionStatus
 import com.campus.startup.features.matching.data.repository.MatchingRepository
-import com.campus.startup.features.matching.data.model.MatchingDirectory
 import com.campus.startup.features.matching.domain.CofounderMatcher
 import com.campus.startup.features.matching.domain.ProfileFormErrors
 import com.campus.startup.features.matching.domain.ProfileValidator
-import com.campus.startup.features.matching.data.model.resolveConnectionStatus
 import com.campus.startup.features.recruitment.data.model.StartupRoleCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,22 +85,27 @@ class MatchingViewModel(
             error != null -> MatchingUiState.Error(error)
             else -> {
                 val me = profiles.find { it.isCurrentUser }
-                val profileReady = me?.let(CofounderMatcher::isReady) == true
+                val profileReady = true
                 val directory = profiles.filter { !it.isCurrentUser }.map { other ->
                     DiscoverableProfile(
                         profile = other,
-                        match = if (me == null) CofounderMatcher.incomplete() else CofounderMatcher.evaluate(me, other),
+                        match = CofounderMatcher.evaluate(
+                            me = me,
+                            candidate = other,
+                            activeInterestFilters = filters.interests
+                        ),
                         connectionStatus = resolveConnectionStatus(
                             myId = MatchCatalog.CURRENT_USER_ID,
                             otherId = other.id,
                             connections = connections
                         )
                     )
-                }
+                }.sortedByDescending { it.match.compatibility }
+
                 MatchingUiState.Success(
                     me = me,
                     students = MatchingDirectory.filter(directory, filters, profileReady),
-                    directory = directory.sortedByDescending { it.match.compatibility },
+                    directory = directory,
                     connections = connections,
                     pendingIncoming = connections.count { request ->
                         request.status.equals("PENDING", ignoreCase = true) &&

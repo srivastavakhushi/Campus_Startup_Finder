@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.campus.startup.core.theme.DarkBorder
 import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.core.theme.PrimaryGreenContainer
 import com.campus.startup.features.matching.data.model.MatchResult
@@ -31,58 +30,41 @@ fun CompatibilityBadge(
     match: MatchResult,
     modifier: Modifier = Modifier
 ) {
-    if (!match.profileReady) {
-        Surface(
-            modifier = modifier.border(1.dp, DarkBorder, RoundedCornerShape(12.dp)),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant
-        ) {
-            Text(
-                text = "Complete profile to score fit",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-        }
-        return
-    }
-
     val (badgeBg, badgeText, icon) = when {
-        match.compatibility >= 70 -> Triple(PrimaryGreenContainer, PrimaryGreen, Icons.Outlined.AutoAwesome)
-        match.compatibility >= 45 -> Triple(Color(0xFF262112), Color(0xFFFBBF24), Icons.Outlined.TrendingUp)
+        match.compatibility >= 75 -> Triple(PrimaryGreenContainer, PrimaryGreen, Icons.Outlined.AutoAwesome)
+        match.compatibility >= 60 -> Triple(Color(0xFF262112), Color(0xFFFBBF24), Icons.Outlined.TrendingUp)
         else -> Triple(Color(0xFF19222E), Color(0xFF60A5FA), Icons.Outlined.CheckCircle)
     }
 
     val shape = RoundedCornerShape(12.dp)
     Surface(
-        modifier = modifier.border(1.dp, badgeText.copy(alpha = 0.35f), shape),
+        modifier = modifier.border(1.dp, badgeText.copy(alpha = 0.45f), shape),
         shape = shape,
         color = badgeBg
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = badgeText,
-                modifier = Modifier.size(13.dp)
+                modifier = Modifier.size(14.dp)
             )
             Spacer(modifier = Modifier.width(5.dp))
             Text(
-                text = "${match.compatibility}% Match",
+                text = "${match.compatibility}% Interest Compatibility",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 color = badgeText
             )
-            if (match.complementarySkills.isNotEmpty()) {
+            if (match.sharedInterests.isNotEmpty()) {
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "• ${match.complementarySkills.take(2).joinToString(", ")}",
+                    text = "• ${match.sharedInterests.take(2).joinToString(", ")}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = badgeText.copy(alpha = 0.85f)
+                    color = badgeText.copy(alpha = 0.9f)
                 )
             }
         }
