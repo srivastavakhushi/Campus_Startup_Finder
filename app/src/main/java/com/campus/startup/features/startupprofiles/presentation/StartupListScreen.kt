@@ -234,27 +234,13 @@ fun StartupListScreen(
             )
         },
         floatingActionButton = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Popup Community Chatbox Button on Home Page
-                ExtendedFloatingActionButton(
-                    onClick = { showCommunityChat = true },
-                    containerColor = DarkSurfaceVariant,
-                    contentColor = PrimaryGreen,
-                    icon = { Icon(Icons.Filled.Forum, contentDescription = "Community Chat") },
-                    text = { Text("Community Chat", fontWeight = FontWeight.Bold) }
-                )
-
-                ExtendedFloatingActionButton(
-                    onClick = onAddClick,
-                    containerColor = PrimaryGreen,
-                    contentColor = Color(0xFF071206),
-                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = { Text("New startup", fontWeight = FontWeight.Bold) }
-                )
-            }
+            ExtendedFloatingActionButton(
+                onClick = onAddClick,
+                containerColor = PrimaryGreen,
+                contentColor = Color(0xFF071206),
+                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                text = { Text("New startup", fontWeight = FontWeight.Bold) }
+            )
         }
     ) { padding ->
         LazyColumn(
@@ -428,19 +414,27 @@ fun StartupListScreen(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CreateProfileOnboardingCard(
     onCreateProfile: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
-        border = BorderStroke(1.5.dp, PrimaryGreen.copy(alpha = 0.65f))
+        border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.5f))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = PrimaryGreenContainer,
@@ -451,67 +445,36 @@ private fun CreateProfileOnboardingCard(
                             imageVector = Icons.Default.AutoAwesome,
                             contentDescription = null,
                             tint = PrimaryGreen,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
+                Column {
                     Text(
-                        text = "Create Your Campus Profile",
+                        text = "Set Up Profile",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = DarkTextPrimary
                     )
                     Text(
-                        text = "Step 1 • Unlock Personalized Startup Recommendations",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = PrimaryGreen
+                        text = "Add interests to unlock recommendations",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = DarkTextSecondary
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Set up your student profile to see startups tailored to your interests, pin startups you're currently recruited in at the top, and apply in 1 tap with your resume.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = DarkTextSecondary
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                listOf("Name & Age", "Course & Year", "Startup Interests", "Upload Resume (PDF)", "Recruited Status").forEach { item ->
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = PrimaryGreenContainer,
-                        border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.3f))
-                    ) {
-                        Text(
-                            text = item,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = PrimaryGreen,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Button(
                 onClick = onCreateProfile,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PrimaryGreen,
                     contentColor = Color(0xFF071206)
-                )
+                ),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Create Profile Now", fontWeight = FontWeight.Bold)
+                Text("Create", fontWeight = FontWeight.Bold)
             }
         }
     }

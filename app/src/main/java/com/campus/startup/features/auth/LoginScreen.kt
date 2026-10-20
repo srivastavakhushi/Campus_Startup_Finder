@@ -115,27 +115,7 @@ fun LoginScreen(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "Sign in as a Student or Professor to explore campus startups, opportunities & co-founders on VentureUp",
-                style = MaterialTheme.typography.bodyMedium,
-                color = DarkTextSecondary,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(22.dp))
-
-            // Role Selector: Student vs Professor
-            Text(
-                text = "Select Your Campus Role",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = DarkTextPrimary,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -143,7 +123,7 @@ fun LoginScreen(
             ) {
                 RoleSelectionCard(
                     title = "Student",
-                    subtitle = "Join startups, find co-founders & apply",
+                    subtitle = "Student Account",
                     icon = Icons.Default.School,
                     selected = selectedRole == CampusUserRole.STUDENT,
                     onClick = {
@@ -157,7 +137,7 @@ fun LoginScreen(
 
                 RoleSelectionCard(
                     title = "Professor",
-                    subtitle = "Mentor teams, review ventures & guide",
+                    subtitle = "Faculty Mentor",
                     icon = Icons.Default.AccountBalance,
                     selected = selectedRole == CampusUserRole.PROFESSOR,
                     onClick = {
@@ -294,65 +274,6 @@ fun LoginScreen(
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Predefined Credentials Reference Card
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = DarkSurfaceVariant,
-                border = BorderStroke(1.dp, DarkBorder)
-            ) {
-                Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = "Predefined Demo Credentials (Tap to autofill)",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = PrimaryGreen
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = {
-                                selectedRole = CampusUserRole.STUDENT
-                                username = UserSession.STUDENT_USERNAME
-                                password = UserSession.STUDENT_PASSWORD
-                                errorMessage = null
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.4f)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = "Student: student / password123",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = DarkTextPrimary
-                            )
-                        }
-                        OutlinedButton(
-                            onClick = {
-                                selectedRole = CampusUserRole.PROFESSOR
-                                username = UserSession.PROFESSOR_USERNAME
-                                password = UserSession.PROFESSOR_PASSWORD
-                                errorMessage = null
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.4f)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = "Prof: professor / password123",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = DarkTextPrimary
-                            )
-                        }
                     }
                 }
             }
