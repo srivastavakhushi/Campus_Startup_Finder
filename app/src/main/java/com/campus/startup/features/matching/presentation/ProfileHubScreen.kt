@@ -24,16 +24,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -72,6 +76,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.campus.startup.core.components.ModernAvatar
 import com.campus.startup.core.theme.DarkBorder
@@ -81,14 +86,19 @@ import com.campus.startup.core.theme.DarkTextSecondary
 import com.campus.startup.core.theme.PrimaryBlue
 import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.core.theme.PrimaryGreenContainer
+import com.campus.startup.features.auth.UserSession
 import com.campus.startup.features.matching.data.model.ConnectionStatus
 import com.campus.startup.features.matching.data.model.MatchCatalog
 import com.campus.startup.features.matching.data.model.StudentMatchProfile
 import com.campus.startup.features.matching.data.model.personLabel
 import com.campus.startup.features.matching.data.model.resolveConnectionStatus
+import com.campus.startup.features.opportunities.presentation.OpportunitiesViewModel
+import com.campus.startup.features.opportunities.presentation.components.OpportunityCard
 import com.campus.startup.features.recruitment.data.model.JobApplication
 import com.campus.startup.features.recruitment.presentation.RecruitmentViewModel
 import com.campus.startup.features.recruitment.presentation.components.StartupOpeningCard
+import com.campus.startup.features.startupprofiles.data.model.StartupEntity
+import com.campus.startup.features.startupprofiles.presentation.StartupProfilesViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -111,20 +121,34 @@ private enum class ProfileConnectionFilter(val label: String) {
     CONNECTED("Connected")
 }
 
+private enum class SavedCategoryFilter(val label: String) {
+    ALL("All Saved"),
+    STARTUPS("Saved Startups"),
+    OPPORTUNITIES("Saved Opportunities"),
+    ROLES("Saved Roles")
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ProfileHubScreen(
     matchingViewModel: MatchingViewModel,
     recruitmentViewModel: RecruitmentViewModel,
+    startupViewModel: StartupProfilesViewModel,
+    opportunitiesViewModel: OpportunitiesViewModel,
     onNavigateBack: () -> Unit,
     onEditProfile: () -> Unit,
     onOpeningClick: (String) -> Unit,
-    onStudentClick: (String) -> Unit
+    onStartupClick: (Int) -> Unit = {},
+    onOpportunityClick: (String) -> Unit = {},
+    onStudentClick: (String) -> Unit,
+    onLogout: () -> Unit = {}
 ) {
     val matchingState by matchingViewModel.uiState.collectAsState()
     val applications by recruitmentViewModel.allApplications.collectAsState()
     val savedOpenings by recruitmentViewModel.savedOpenings.collectAsState()
     val myPostedOpenings by recruitmentViewModel.myPostedOpenings.collectAsState()
+    val savedStartups by startupViewModel.savedStartups.collectAsState()
+    val savedOpportunities by opportunitiesViewModel.savedOpportunities.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     MatchingStatusSnackbar(matchingViewModel, snackbarHostState)
@@ -132,9 +156,10 @@ fun ProfileHubScreen(
     val successState = matchingState as? MatchingUiState.Success
     val me = successState?.me
 
-    // Order requested by user: 0 = Saved Roles, 1 = Your Connections, 2 = Your Inbox, 3 = Applications
+    // 0 = Saved (Startups, Opportunities, Roles), 1 = Your Connections, 2 = Your Inbox, 3 = Applications
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var connectionFilter by rememberSaveable { mutableStateOf(ProfileConnectionFilter.ALL) }
+    var savedFilter by rememberSaveable { mutableStateOf(SavedCategoryFilter.ALL) }
 
     val inboxMessages = remember {
         mutableStateListOf(
@@ -168,6 +193,7 @@ fun ProfileHubScreen(
         )
     }
 
+    val totalSavedCount = savedStartups.size + savedOpportunities.size + savedOpenings.size
     val allConnectionsCount = successState?.connections?.size ?: 0
     val pendingConnectionsCount = successState?.pendingIncoming ?: 0
     val unreadInboxCount = inboxMessages.count { it.isUnread }
@@ -178,14 +204,32 @@ fun ProfileHubScreen(
             TopAppBar(
                 title = {
                     Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "My Profile",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = DarkTextPrimary
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = PrimaryGreenContainer,
+                                border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.45f))
+                            ) {
+                                Text(
+                                    text = UserSession.role.label,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = PrimaryGreen,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                         Text(
-                            text = "My Profile",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = DarkTextPrimary
-                        )
-                        Text(
-                            text = "Saved Roles • Connections • Inbox • Applications",
+                            text = "Saved Items • Connections • Inbox • Applications",
                             style = MaterialTheme.typography.bodySmall,
                             color = DarkTextSecondary
                         )
@@ -199,6 +243,13 @@ fun ProfileHubScreen(
                 actions = {
                     IconButton(onClick = onEditProfile) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit Profile", tint = PrimaryGreen)
+                    }
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = "Switch Account / Logout",
+                            tint = DarkTextSecondary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface)
@@ -216,7 +267,7 @@ fun ProfileHubScreen(
                 onEditProfile = onEditProfile
             )
 
-            // Quick stats selector cards for Saved Roles, Your Connections, Your Inbox, Applications
+            // Quick stats selector cards for Saved Items, Your Connections, Your Inbox, Applications
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -224,8 +275,8 @@ fun ProfileHubScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 ProfileStatPill(
-                    title = "Saved Roles",
-                    count = savedOpenings.size,
+                    title = "Saved",
+                    count = totalSavedCount,
                     icon = Icons.Default.Bookmark,
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
@@ -259,9 +310,9 @@ fun ProfileHubScreen(
                 )
             }
 
-            // 4 Hub Tabs: Saved Roles, Your Connections, Your Inbox, Applications
+            // 4 Hub Tabs: Saved Items, Your Connections, Your Inbox, Applications
             val tabs = listOf(
-                Triple("Saved Roles", savedOpenings.size, Icons.Default.Bookmark),
+                Triple("Saved Items", totalSavedCount, Icons.Default.Bookmark),
                 Triple("Your Connections", pendingConnectionsCount, Icons.Default.Group),
                 Triple("Your Inbox", unreadInboxCount, Icons.Default.Inbox),
                 Triple("Applications", applications.size, Icons.AutoMirrored.Outlined.Assignment)
@@ -306,23 +357,111 @@ fun ProfileHubScreen(
 
             when (selectedTab) {
                 0 -> {
-                    // 1. Saved Roles
-                    if (savedOpenings.isEmpty()) {
-                        EmptyHubState(
-                            title = "No Saved Roles Yet",
-                            subtitle = "Bookmark startup openings in the Recruitment tab and they will appear exclusively here in your Profile."
-                        )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp)
+                    // 1. Saved Startups, Saved Opportunities & Saved Roles
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(savedOpenings, key = { it.id }) { opening ->
-                                StartupOpeningCard(
-                                    opening = opening,
-                                    onClick = { onOpeningClick(opening.id) },
-                                    onSaveToggle = { recruitmentViewModel.toggleSaveOpening(opening) }
+                            SavedCategoryFilter.values().forEach { filter ->
+                                val count = when (filter) {
+                                    SavedCategoryFilter.ALL -> totalSavedCount
+                                    SavedCategoryFilter.STARTUPS -> savedStartups.size
+                                    SavedCategoryFilter.OPPORTUNITIES -> savedOpportunities.size
+                                    SavedCategoryFilter.ROLES -> savedOpenings.size
+                                }
+                                FilterChip(
+                                    selected = savedFilter == filter,
+                                    onClick = { savedFilter = filter },
+                                    label = {
+                                        Text(
+                                            "${filter.label} ($count)",
+                                            fontWeight = if (savedFilter == filter) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = PrimaryGreenContainer,
+                                        selectedLabelColor = PrimaryGreen
+                                    )
                                 )
+                            }
+                        }
+
+                        val showStartups = (savedFilter == SavedCategoryFilter.ALL || savedFilter == SavedCategoryFilter.STARTUPS) && savedStartups.isNotEmpty()
+                        val showOpportunities = (savedFilter == SavedCategoryFilter.ALL || savedFilter == SavedCategoryFilter.OPPORTUNITIES) && savedOpportunities.isNotEmpty()
+                        val showRoles = (savedFilter == SavedCategoryFilter.ALL || savedFilter == SavedCategoryFilter.ROLES) && savedOpenings.isNotEmpty()
+
+                        if (!showStartups && !showOpportunities && !showRoles) {
+                            EmptyHubState(
+                                title = "No Saved Items Yet",
+                                subtitle = "Tap the Save button on Startups, Hackathons/Opportunities, or Recruitment Roles and they will appear here in your Profile."
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp)
+                            ) {
+                                if (showStartups) {
+                                    item {
+                                        Text(
+                                            text = "Saved Startups (${savedStartups.size})",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = PrimaryGreen,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                        )
+                                    }
+                                    items(savedStartups, key = { "saved_startup_${it.id}" }) { startup ->
+                                        SavedStartupProfileCard(
+                                            startup = startup,
+                                            onClick = { onStartupClick(startup.id) },
+                                            onLikeClick = { startupViewModel.toggleInterested(startup) },
+                                            onUnsaveClick = { startupViewModel.toggleSaved(startup) }
+                                        )
+                                    }
+                                }
+
+                                if (showOpportunities) {
+                                    item {
+                                        Text(
+                                            text = "Saved Opportunities & Hackathons (${savedOpportunities.size})",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = PrimaryGreen,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                        )
+                                    }
+                                    items(savedOpportunities, key = { "saved_opp_${it.id}" }) { opp ->
+                                        OpportunityCard(
+                                            opportunity = opp,
+                                            onClick = { onOpportunityClick(opp.id) },
+                                            onLikeToggle = { opportunitiesViewModel.toggleLikeOpportunity(opp) },
+                                            onBookmarkToggle = { opportunitiesViewModel.toggleSaveOpportunity(opp) }
+                                        )
+                                    }
+                                }
+
+                                if (showRoles) {
+                                    item {
+                                        Text(
+                                            text = "Saved Startup Roles (${savedOpenings.size})",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = PrimaryGreen,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                        )
+                                    }
+                                    items(savedOpenings, key = { "saved_role_${it.id}" }) { opening ->
+                                        StartupOpeningCard(
+                                            opening = opening,
+                                            onClick = { onOpeningClick(opening.id) },
+                                            onSaveToggle = { recruitmentViewModel.toggleSaveOpening(opening) }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -571,6 +710,119 @@ fun ProfileHubScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SavedStartupProfileCard(
+    startup: StartupEntity,
+    onClick: () -> Unit,
+    onLikeClick: () -> Unit,
+    onUnsaveClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        border = BorderStroke(1.dp, DarkBorder)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = PrimaryGreenContainer,
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Business,
+                            contentDescription = null,
+                            tint = PrimaryGreen,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = startup.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkTextPrimary
+                    )
+                    Text(
+                        text = "${startup.category} • ${startup.stage}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = PrimaryGreen
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (startup.isInterested) Color(0xFF33141B) else MaterialTheme.colorScheme.surfaceVariant,
+                    border = BorderStroke(1.dp, if (startup.isInterested) Color(0xFFFF4D6D) else DarkBorder),
+                    modifier = Modifier.clickable(onClick = onLikeClick)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (startup.isInterested) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Like Startup",
+                            tint = if (startup.isInterested) Color(0xFFFF4D6D) else DarkTextSecondary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = "${startup.likesCount}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (startup.isInterested) Color(0xFFFF4D6D) else DarkTextSecondary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = PrimaryGreenContainer,
+                    border = BorderStroke(1.dp, PrimaryGreen),
+                    modifier = Modifier.clickable(onClick = onUnsaveClick)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = "Saved Startup",
+                            tint = PrimaryGreen,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = "Saved",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryGreen
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = startup.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = DarkTextSecondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
