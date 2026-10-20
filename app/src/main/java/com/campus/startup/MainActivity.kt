@@ -219,7 +219,7 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate(Screen.RecruitmentDetail.createRoute(openingId))
                                 },
                                 onStartupClick = { startupId ->
-                                    navController.navigate(StartupRoutes.detailRoute(startupId))
+                                    navController.navigate(StartupRoutes.detail(startupId))
                                 },
                                 onOpportunityClick = { oppId ->
                                     navController.navigate(Screen.Detail.createRoute(oppId))

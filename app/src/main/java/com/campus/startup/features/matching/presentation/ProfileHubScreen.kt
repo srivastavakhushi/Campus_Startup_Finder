@@ -92,8 +92,8 @@ import com.campus.startup.features.matching.data.model.MatchCatalog
 import com.campus.startup.features.matching.data.model.StudentMatchProfile
 import com.campus.startup.features.matching.data.model.personLabel
 import com.campus.startup.features.matching.data.model.resolveConnectionStatus
+import com.campus.startup.features.opportunities.data.local.OpportunityEntity
 import com.campus.startup.features.opportunities.presentation.OpportunitiesViewModel
-import com.campus.startup.features.opportunities.presentation.components.OpportunityCard
 import com.campus.startup.features.recruitment.data.model.JobApplication
 import com.campus.startup.features.recruitment.presentation.RecruitmentViewModel
 import com.campus.startup.features.recruitment.presentation.components.StartupOpeningCard
@@ -138,12 +138,13 @@ fun ProfileHubScreen(
     onNavigateBack: () -> Unit,
     onEditProfile: () -> Unit,
     onOpeningClick: (String) -> Unit,
-    onStartupClick: (Int) -> Unit = {},
+    onStartupClick: (String) -> Unit = {},
     onOpportunityClick: (String) -> Unit = {},
     onStudentClick: (String) -> Unit,
     onLogout: () -> Unit = {}
 ) {
     val matchingState by matchingViewModel.uiState.collectAsState()
+    val currentUser by UserSession.currentUser.collectAsState()
     val applications by recruitmentViewModel.allApplications.collectAsState()
     val savedOpenings by recruitmentViewModel.savedOpenings.collectAsState()
     val myPostedOpenings by recruitmentViewModel.myPostedOpenings.collectAsState()
@@ -220,7 +221,7 @@ fun ProfileHubScreen(
                                 border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.45f))
                             ) {
                                 Text(
-                                    text = UserSession.role.label,
+                                    text = currentUser?.role?.displayName ?: "Student",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = PrimaryGreen,
                                     fontWeight = FontWeight.Bold,
@@ -435,11 +436,10 @@ fun ProfileHubScreen(
                                         )
                                     }
                                     items(savedOpportunities, key = { "saved_opp_${it.id}" }) { opp ->
-                                        OpportunityCard(
+                                        SavedOpportunityProfileCard(
                                             opportunity = opp,
                                             onClick = { onOpportunityClick(opp.id) },
-                                            onLikeToggle = { opportunitiesViewModel.toggleLikeOpportunity(opp) },
-                                            onBookmarkToggle = { opportunitiesViewModel.toggleSaveOpportunity(opp) }
+                                            onUnsaveClick = { opportunitiesViewModel.removeSavedOpportunity(opp.id) }
                                         )
                                     }
                                 }
@@ -758,7 +758,7 @@ private fun SavedStartupProfileCard(
                         color = DarkTextPrimary
                     )
                     Text(
-                        text = "${startup.category} • ${startup.stage}",
+                        text = "${startup.domain} • ${startup.stage}",
                         style = MaterialTheme.typography.labelSmall,
                         color = PrimaryGreen
                     )
@@ -818,6 +818,77 @@ private fun SavedStartupProfileCard(
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = startup.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = DarkTextSecondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun SavedOpportunityProfileCard(
+    opportunity: OpportunityEntity,
+    onClick: () -> Unit,
+    onUnsaveClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        border = BorderStroke(1.dp, DarkBorder)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = opportunity.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkTextPrimary
+                    )
+                    Text(
+                        text = "${opportunity.organization} • ${opportunity.domain} • ${opportunity.stipendOrPrize}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = PrimaryGreen
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = PrimaryGreenContainer,
+                    border = BorderStroke(1.dp, PrimaryGreen),
+                    modifier = Modifier.clickable(onClick = onUnsaveClick)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = "Unsave Opportunity",
+                            tint = PrimaryGreen,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = "Saved",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryGreen
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = opportunity.description,
                 style = MaterialTheme.typography.bodySmall,
                 color = DarkTextSecondary,
                 maxLines = 2,
