@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,6 +38,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -72,19 +74,18 @@ fun LoginScreen(
     var password by rememberSaveable { mutableStateOf(UserSession.STUDENT_PASSWORD) }
     var showPassword by rememberSaveable { mutableStateOf(false) }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    val scrollState = rememberScrollState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DarkBackground)
-            .padding(horizontal = 20.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    Scaffold(
+        containerColor = DarkBackground
+    ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(vertical = 24.dp),
+                .fillMaxSize()
+                .padding(padding)
+                .imePadding()
+                .verticalScroll(scrollState)
+                .padding(horizontal = 20.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // App Logo & Header
@@ -107,8 +108,8 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "Campus Startup Finder",
-                style = MaterialTheme.typography.headlineSmall,
+                text = "VentureUp",
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.ExtraBold,
                 color = DarkTextPrimary,
                 textAlign = TextAlign.Center
@@ -117,7 +118,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Sign in as a Student or Professor to explore campus startups, opportunities & co-founders",
+                text = "Sign in as a Student or Professor to explore campus startups, opportunities & co-founders on VentureUp",
                 style = MaterialTheme.typography.bodyMedium,
                 color = DarkTextSecondary,
                 textAlign = TextAlign.Center

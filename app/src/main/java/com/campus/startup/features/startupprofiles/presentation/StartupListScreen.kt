@@ -143,7 +143,7 @@ fun StartupListScreen(
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Campus Startups",
+                                text = "VentureUp",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = DarkTextPrimary

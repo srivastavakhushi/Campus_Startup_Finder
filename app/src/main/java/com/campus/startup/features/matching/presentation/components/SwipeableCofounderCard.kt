@@ -7,7 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -101,7 +101,7 @@ fun SwipeableCofounderCard(
                     rotationZ = dragRotation
                 }
                 .pointerInput(student.profile.id) {
-                    detectDragGestures(
+                    detectHorizontalDragGestures(
                         onDragEnd = {
                             coroutineScope.launch {
                                 if (offsetX.value > swipeThreshold) {
@@ -125,11 +125,11 @@ fun SwipeableCofounderCard(
                                 offsetY.animateTo(0f)
                             }
                         },
-                        onDrag = { change, dragAmount ->
+                        onHorizontalDrag = { change, dragAmount ->
                             change.consume()
                             coroutineScope.launch {
-                                offsetX.snapTo(offsetX.value + dragAmount.x)
-                                offsetY.snapTo(offsetY.value + dragAmount.y * 0.25f)
+                                offsetX.snapTo(offsetX.value + dragAmount)
+                                offsetY.snapTo(0f)
                             }
                         }
                     )
