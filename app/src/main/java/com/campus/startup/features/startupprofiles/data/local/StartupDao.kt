@@ -13,6 +13,9 @@ interface StartupDao {
     @Query("SELECT * FROM startups ORDER BY createdAt DESC")
     fun observeAll(): Flow<List<StartupEntity>>
 
+    @Query("SELECT * FROM startups WHERE isSaved = 1 ORDER BY createdAt DESC")
+    fun observeSavedStartups(): Flow<List<StartupEntity>>
+
     @Query("SELECT * FROM startups WHERE id = :id")
     fun observeById(id: String): Flow<StartupEntity?>
 
@@ -28,8 +31,11 @@ interface StartupDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(startups: List<StartupEntity>)
 
-    @Query("UPDATE startups SET isInterested = :isInterested WHERE id = :id")
-    suspend fun updateInterested(id: String, isInterested: Boolean)
+    @Query("UPDATE startups SET isInterested = :isInterested, likesCount = :likesCount WHERE id = :id")
+    suspend fun updateInterested(id: String, isInterested: Boolean, likesCount: Int)
+
+    @Query("UPDATE startups SET isSaved = :isSaved WHERE id = :id")
+    suspend fun updateSaved(id: String, isSaved: Boolean)
 
     @Query("UPDATE startups SET isRecruited = :isRecruited, recruitedRole = :role WHERE id = :id")
     suspend fun updateRecruited(id: String, isRecruited: Boolean, role: String)

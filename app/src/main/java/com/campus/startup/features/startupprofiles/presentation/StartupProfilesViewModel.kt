@@ -45,6 +45,9 @@ class StartupProfilesViewModel(
     val allStartups: StateFlow<List<StartupEntity>> = repository.observeAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val savedStartups: StateFlow<List<StartupEntity>> = repository.observeSavedStartups()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     val startups: StateFlow<List<StartupEntity>> = combine(
         repository.observeAll(), _query, _domainFilter, _stageFilter
     ) { all, q, domain, stage ->
@@ -79,7 +82,13 @@ class StartupProfilesViewModel(
 
     fun toggleInterested(startup: StartupEntity) {
         viewModelScope.launch {
-            repository.toggleInterested(startup.id, startup.isInterested)
+            repository.toggleInterested(startup)
+        }
+    }
+
+    fun toggleSaved(startup: StartupEntity) {
+        viewModelScope.launch {
+            repository.toggleSaved(startup)
         }
     }
 
@@ -141,7 +150,7 @@ class StartupProfilesViewModel(
             matched.size >= 3 -> 88
             matched.size == 2 -> 78
             matched.size == 1 -> 65
-            startup.isInterested -> 60
+            startup.isInterested || startup.isSaved -> 60
             else -> 0
         }
 

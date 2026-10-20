@@ -20,8 +20,12 @@ data class StartupEntity(
     val requirements: String = "",
     /** Comma-separated interest/skill keywords for personalized matching */
     val tags: String = "",
-    /** Whether the current student is marked as interested/following this startup */
+    /** Whether the current user has liked/upvoted this startup */
     val isInterested: Boolean = false,
+    /** Whether the current user has saved/bookmarked this startup for their Profile */
+    val isSaved: Boolean = false,
+    /** Community likes count */
+    val likesCount: Int = 18,
     /** Whether the current student is currently recruited/working in this startup */
     val isRecruited: Boolean = false,
     /** Role title if currently recruited in this startup */

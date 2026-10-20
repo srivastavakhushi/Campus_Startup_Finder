@@ -6,13 +6,20 @@ import kotlinx.coroutines.flow.Flow
 
 class StartupRepository(private val dao: StartupDao) {
     fun observeAll(): Flow<List<StartupEntity>> = dao.observeAll()
+    fun observeSavedStartups(): Flow<List<StartupEntity>> = dao.observeSavedStartups()
     fun observeById(id: String): Flow<StartupEntity?> = dao.observeById(id)
     suspend fun getById(id: String): StartupEntity? = dao.getById(id)
     suspend fun save(startup: StartupEntity) = dao.upsert(startup)
     suspend fun delete(id: String) = dao.deleteById(id)
 
-    suspend fun toggleInterested(id: String, currentInterested: Boolean) {
-        dao.updateInterested(id, !currentInterested)
+    suspend fun toggleInterested(startup: StartupEntity) {
+        val nextLiked = !startup.isInterested
+        val nextCount = if (nextLiked) startup.likesCount + 1 else (startup.likesCount - 1).coerceAtLeast(0)
+        dao.updateInterested(startup.id, nextLiked, nextCount)
+    }
+
+    suspend fun toggleSaved(startup: StartupEntity) {
+        dao.updateSaved(startup.id, !startup.isSaved)
     }
 
     suspend fun setRecruited(id: String, isRecruited: Boolean, role: String = "Core Team Member") {
@@ -35,6 +42,8 @@ class StartupRepository(private val dao: StartupDao) {
                     requirements = "Looking for Python/LLM engineers and mobile developers passionate about EdTech & AI.",
                     tags = "AI / ML, Artificial Intelligence, EdTech, Data, Open Source, Python, Kotlin",
                     isInterested = true,
+                    isSaved = true,
+                    likesCount = 42,
                     isRecruited = true,
                     recruitedRole = "Product & Engineering Team",
                     createdAt = now - 100_000L
@@ -51,6 +60,8 @@ class StartupRepository(private val dao: StartupDao) {
                     requirements = "Kotlin / Jetpack Compose developers for live order tracking and campus growth marketers.",
                     tags = "E-Commerce, Campus consumer, Marketplace, Community, Kotlin, Jetpack Compose, Flutter",
                     isInterested = true,
+                    isSaved = true,
+                    likesCount = 36,
                     isRecruited = false,
                     recruitedRole = "",
                     createdAt = now - 200_000L
@@ -67,6 +78,8 @@ class StartupRepository(private val dao: StartupDao) {
                     requirements = "UI/UX designers and FinTech enthusiasts interested in student payments and financial literacy.",
                     tags = "FinTech, Finance, SaaS, Data, Product Design, Flutter, Figma",
                     isInterested = false,
+                    isSaved = false,
+                    likesCount = 29,
                     isRecruited = false,
                     recruitedRole = "",
                     createdAt = now - 300_000L
@@ -83,6 +96,8 @@ class StartupRepository(private val dao: StartupDao) {
                     requirements = "Sustainability advocates, product designers, and campus outreach leads.",
                     tags = "Social Impact, Social impact, Sustainability, Climate, Product Design, Community",
                     isInterested = false,
+                    isSaved = false,
+                    likesCount = 24,
                     isRecruited = false,
                     recruitedRole = "",
                     createdAt = now - 400_000L
@@ -99,6 +114,8 @@ class StartupRepository(private val dao: StartupDao) {
                     requirements = "React/Mobile developers and departmental ambassadors.",
                     tags = "EdTech, Community, Public Speaking, Writing, Artificial Intelligence, SaaS",
                     isInterested = false,
+                    isSaved = false,
+                    likesCount = 31,
                     isRecruited = false,
                     recruitedRole = "",
                     createdAt = now - 500_000L
@@ -115,6 +132,8 @@ class StartupRepository(private val dao: StartupDao) {
                     requirements = "Android/Web builders and UX researchers passionate about student healthcare.",
                     tags = "HealthTech, Product Design, Community, Social impact, AI / ML, Figma",
                     isInterested = false,
+                    isSaved = false,
+                    likesCount = 19,
                     isRecruited = false,
                     recruitedRole = "",
                     createdAt = now - 600_000L
@@ -131,6 +150,8 @@ class StartupRepository(private val dao: StartupDao) {
                     requirements = "Hardware & IoT tinkerers, Flutter/Android developers, and backend engineers.",
                     tags = "SaaS, Hardware, Hardware & IoT, Open Source, Campus consumer, Python, Flutter",
                     isInterested = false,
+                    isSaved = false,
+                    likesCount = 27,
                     isRecruited = false,
                     recruitedRole = "",
                     createdAt = now - 700_000L
@@ -147,6 +168,8 @@ class StartupRepository(private val dao: StartupDao) {
                     requirements = "Game developers, UI artists, and sound/storytelling enthusiasts.",
                     tags = "Gaming, Product Design, Open Source, Writing, Artificial Intelligence",
                     isInterested = false,
+                    isSaved = false,
+                    likesCount = 22,
                     isRecruited = false,
                     recruitedRole = "",
                     createdAt = now - 800_000L
