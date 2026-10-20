@@ -15,10 +15,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -74,8 +77,15 @@ fun StartupDetailScreen(
                         IconButton(onClick = { viewModel.toggleInterested(s) }) {
                             Icon(
                                 imageVector = if (s.isInterested) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                                contentDescription = "Interested",
-                                tint = if (s.isInterested) PrimaryGreen else MaterialTheme.colorScheme.onSurface
+                                contentDescription = "Like Startup",
+                                tint = if (s.isInterested) Color(0xFFF43F5E) else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(onClick = { viewModel.toggleSaved(s) }) {
+                            Icon(
+                                imageVector = if (s.isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = "Save Startup",
+                                tint = if (s.isSaved) PrimaryGreen else MaterialTheme.colorScheme.onSurface
                             )
                         }
                         IconButton(onClick = { onEdit(startupId) }) {
@@ -115,14 +125,24 @@ fun StartupDetailScreen(
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     FilterChip(
                         selected = s.isInterested,
                         onClick = { viewModel.toggleInterested(s) },
-                        label = { Text(if (s.isInterested) "Interested ✓" else "Mark Interested") },
+                        label = { Text(if (s.isInterested) "Liked (${s.likesCount}) ♥" else "Like (${s.likesCount})") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFF36151E),
+                            selectedLabelColor = Color(0xFFF43F5E)
+                        )
+                    )
+                    FilterChip(
+                        selected = s.isSaved,
+                        onClick = { viewModel.toggleSaved(s) },
+                        label = { Text(if (s.isSaved) "Saved to Profile ✓" else "Save Startup") },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = PrimaryGreenContainer,
                             selectedLabelColor = PrimaryGreen

@@ -22,18 +22,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -57,6 +59,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,16 +71,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.campus.startup.core.theme.DarkBorder
 import com.campus.startup.core.theme.DarkSurface
+import com.campus.startup.core.theme.DarkSurfaceVariant
 import com.campus.startup.core.theme.DarkTextPrimary
 import com.campus.startup.core.theme.DarkTextSecondary
 import com.campus.startup.core.theme.PrimaryBlue
 import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.core.theme.PrimaryGreenContainer
+import com.campus.startup.features.auth.CampusUserRole
+import com.campus.startup.features.auth.UserSession
 import com.campus.startup.features.matching.data.model.StudentMatchProfile
 import com.campus.startup.features.matching.presentation.MatchingUiState
 import com.campus.startup.features.matching.presentation.MatchingViewModel
 import com.campus.startup.features.recruitment.presentation.RecruitmentViewModel
-import com.campus.startup.features.startupprofiles.data.model.StartupEntity
 import com.campus.startup.features.startupprofiles.data.model.StartupOptions
 import com.campus.startup.features.startupprofiles.data.model.toCsvList
 
@@ -91,6 +98,7 @@ fun StartupListScreen(
     onOpenProfileHub: () -> Unit
 ) {
     val startups by viewModel.startups.collectAsStateWithLifecycle()
+    val savedStartups by viewModel.savedStartups.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
     val domainFilter by viewModel.domainFilter.collectAsStateWithLifecycle()
     val stageFilter by viewModel.stageFilter.collectAsStateWithLifecycle()
@@ -98,13 +106,16 @@ fun StartupListScreen(
     val matchingState by matchingViewModel.uiState.collectAsState()
     val applications by recruitmentViewModel.allApplications.collectAsState()
     val savedOpenings by recruitmentViewModel.savedOpenings.collectAsState()
+    val loggedInUser by UserSession.currentUser.collectAsState()
+
+    var showCommunityChat by rememberSaveable { mutableStateOf(false) }
 
     val successMatch = matchingState as? MatchingUiState.Success
     val me = successMatch?.me
     val isProfileCreated = me?.profileComplete == true
 
-    // Hub badge count: applications + saved roles + pending incoming connections + 2 unread inbox items
-    val hubBadgeCount = (successMatch?.pendingIncoming ?: 0) + applications.size + savedOpenings.size + 2
+    // Hub badge count: applications + saved startups + saved roles + pending incoming connections
+    val hubBadgeCount = (successMatch?.pendingIncoming ?: 0) + applications.size + savedOpenings.size + savedStartups.size
 
     // Startups where the user has applied and been recruited/shortlisted
     val recruitedStartupNamesFromApps = applications
@@ -118,10 +129,10 @@ fun StartupListScreen(
 
     val recruitedStartups = evaluatedStartups.filter { it.isRecruited }
     val recommendedStartups = evaluatedStartups
-        .filter { !it.isRecruited && (it.matchScore > 0 || it.startup.isInterested) }
+        .filter { !it.isRecruited && (it.matchScore > 0 || it.startup.isInterested || it.startup.isSaved) }
         .sortedByDescending { it.matchScore }
     val otherStartups = evaluatedStartups
-        .filter { !it.isRecruited && it.matchScore == 0 && !it.startup.isInterested }
+        .filter { !it.isRecruited && it.matchScore == 0 && !it.startup.isInterested && !it.startup.isSaved }
 
     Scaffold(
         contentWindowInsets = NoInsets,
@@ -140,23 +151,26 @@ fun StartupListScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = PrimaryGreenContainer,
-                                border = BorderStroke(1.dp, PrimaryGreen.copy(alpha = 0.4f))
+                                color = if (loggedInUser?.role == CampusUserRole.PROFESSOR) PrimaryBlue.copy(alpha = 0.2f) else PrimaryGreenContainer,
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (loggedInUser?.role == CampusUserRole.PROFESSOR) PrimaryBlue else PrimaryGreen.copy(alpha = 0.4f)
+                                )
                             ) {
                                 Text(
-                                    text = "HOME",
+                                    text = loggedInUser?.role?.badgeLabel ?: "HOME",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = PrimaryGreen,
+                                    color = if (loggedInUser?.role == CampusUserRole.PROFESSOR) PrimaryBlue else PrimaryGreen,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
                         }
                         Text(
-                            text = if (isProfileCreated) {
-                                "Personalized for ${me?.name}"
-                            } else {
-                                "Create your profile to see startup recommendations"
+                            text = when {
+                                isProfileCreated -> "Personalized for ${me?.name}"
+                                loggedInUser != null -> "Signed in as ${loggedInUser?.displayName} (${loggedInUser?.role?.displayName})"
+                                else -> "Create your profile to see startup recommendations"
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = DarkTextSecondary
@@ -164,7 +178,16 @@ fun StartupListScreen(
                     }
                 },
                 actions = {
-                    // Profile Icon in the corner -> Opens Applications, Inbox, Saved Roles & Connections
+                    // Community Chat Popup Trigger in Top Bar
+                    IconButton(onClick = { showCommunityChat = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Forum,
+                            contentDescription = "Open Community Chat Popup",
+                            tint = PrimaryGreen
+                        )
+                    }
+
+                    // Profile Icon in the corner -> Opens Saved Startups/Opportunities/Roles, Connections, Inbox & Applications
                     BadgedBox(
                         badge = {
                             if (hubBadgeCount > 0) {
@@ -199,7 +222,7 @@ fun StartupListScreen(
                             } else {
                                 Icon(
                                     imageVector = Icons.Outlined.AccountCircle,
-                                    contentDescription = "My Profile, Applications, Inbox, Saved Roles & Connections",
+                                    contentDescription = "My Profile, Saved Items, Inbox, Applications & Connections",
                                     tint = PrimaryGreen,
                                     modifier = Modifier.size(30.dp)
                                 )
@@ -211,13 +234,27 @@ fun StartupListScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onAddClick,
-                containerColor = PrimaryGreen,
-                contentColor = Color(0xFF071206),
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("New startup", fontWeight = FontWeight.Bold) }
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Popup Community Chatbox Button on Home Page
+                ExtendedFloatingActionButton(
+                    onClick = { showCommunityChat = true },
+                    containerColor = DarkSurfaceVariant,
+                    contentColor = PrimaryGreen,
+                    icon = { Icon(Icons.Filled.Forum, contentDescription = "Community Chat") },
+                    text = { Text("Community Chat", fontWeight = FontWeight.Bold) }
+                )
+
+                ExtendedFloatingActionButton(
+                    onClick = onAddClick,
+                    containerColor = PrimaryGreen,
+                    contentColor = Color(0xFF071206),
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text("New startup", fontWeight = FontWeight.Bold) }
+                )
+            }
         }
     ) { padding ->
         LazyColumn(
@@ -250,7 +287,7 @@ fun StartupListScreen(
                 item {
                     SectionHeader(
                         title = "All Campus Startups (${startups.size})",
-                        subtitle = "Create your profile above to see which startups match your interests"
+                        subtitle = "Like or Save startups below — saved startups appear in your Profile"
                     )
                 }
 
@@ -260,6 +297,7 @@ fun StartupListScreen(
                         showMatchDetails = false,
                         onClick = { onStartupClick(rec.startup.id) },
                         onToggleInterested = { viewModel.toggleInterested(rec.startup) },
+                        onToggleSaved = { viewModel.toggleSaved(rec.startup) },
                         onToggleRecruited = { viewModel.toggleRecruited(rec.startup) }
                     )
                 }
@@ -300,6 +338,7 @@ fun StartupListScreen(
                             showMatchDetails = true,
                             onClick = { onStartupClick(rec.startup.id) },
                             onToggleInterested = { viewModel.toggleInterested(rec.startup) },
+                            onToggleSaved = { viewModel.toggleSaved(rec.startup) },
                             onToggleRecruited = { viewModel.toggleRecruited(rec.startup) }
                         )
                     }
@@ -343,6 +382,7 @@ fun StartupListScreen(
                             showMatchDetails = true,
                             onClick = { onStartupClick(rec.startup.id) },
                             onToggleInterested = { viewModel.toggleInterested(rec.startup) },
+                            onToggleSaved = { viewModel.toggleSaved(rec.startup) },
                             onToggleRecruited = { viewModel.toggleRecruited(rec.startup) }
                         )
                     }
@@ -362,12 +402,29 @@ fun StartupListScreen(
                             showMatchDetails = false,
                             onClick = { onStartupClick(rec.startup.id) },
                             onToggleInterested = { viewModel.toggleInterested(rec.startup) },
+                            onToggleSaved = { viewModel.toggleSaved(rec.startup) },
                             onToggleRecruited = { viewModel.toggleRecruited(rec.startup) }
                         )
                     }
                 }
             }
         }
+    }
+
+    if (showCommunityChat) {
+        val displayName = me?.name?.takeIf { it.isNotBlank() }
+            ?: loggedInUser?.displayName
+            ?: "Campus Member"
+        val roleBadge = when {
+            loggedInUser?.role == CampusUserRole.PROFESSOR -> "Professor • Faculty Mentor"
+            me != null && me.course.isNotBlank() -> "Student • ${me.course}"
+            else -> "Student • Campus Innovator"
+        }
+        CommunityChatDialog(
+            currentUserName = displayName,
+            currentUserRoleBadge = roleBadge,
+            onDismiss = { showCommunityChat = false }
+        )
     }
 }
 
@@ -644,6 +701,7 @@ private fun StartupRecommendationCard(
     showMatchDetails: Boolean,
     onClick: () -> Unit,
     onToggleInterested: () -> Unit,
+    onToggleSaved: () -> Unit,
     onToggleRecruited: () -> Unit
 ) {
     val startup = recommendation.startup
@@ -757,12 +815,65 @@ private fun StartupRecommendationCard(
                     }
                 }
 
-                IconButton(onClick = onToggleInterested) {
-                    Icon(
-                        imageVector = if (startup.isInterested) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (startup.isInterested) "Interested" else "Mark as Interested",
-                        tint = if (startup.isInterested) PrimaryGreen else DarkTextSecondary
-                    )
+                // Both Like and Save buttons on top right of Startup Card
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Surface(
+                        modifier = Modifier.clickable(onClick = onToggleInterested),
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (startup.isInterested) Color(0xFF36151E) else DarkSurfaceVariant,
+                        border = BorderStroke(
+                            1.dp,
+                            if (startup.isInterested) Color(0xFFF43F5E).copy(alpha = 0.6f) else DarkBorder
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (startup.isInterested) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Like Startup",
+                                tint = if (startup.isInterested) Color(0xFFF43F5E) else DarkTextSecondary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = if (startup.isInterested) "Liked (${startup.likesCount})" else "Like (${startup.likesCount})",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (startup.isInterested) Color(0xFFF43F5E) else DarkTextSecondary
+                            )
+                        }
+                    }
+
+                    Surface(
+                        modifier = Modifier.clickable(onClick = onToggleSaved),
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (startup.isSaved) PrimaryGreenContainer else DarkSurfaceVariant,
+                        border = BorderStroke(
+                            1.dp,
+                            if (startup.isSaved) PrimaryGreen.copy(alpha = 0.6f) else DarkBorder
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (startup.isSaved) Icons.Default.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = "Save Startup",
+                                tint = if (startup.isSaved) PrimaryGreen else DarkTextSecondary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = if (startup.isSaved) "Saved" else "Save",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (startup.isSaved) PrimaryGreen else DarkTextSecondary
+                            )
+                        }
+                    }
                 }
             }
 
@@ -802,24 +913,9 @@ private fun StartupRecommendationCard(
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                FilterChip(
-                    selected = startup.isInterested,
-                    onClick = onToggleInterested,
-                    label = {
-                        Text(
-                            text = if (startup.isInterested) "Interested ✓" else "I'm Interested",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = PrimaryGreenContainer,
-                        selectedLabelColor = PrimaryGreen
-                    )
-                )
-
                 FilterChip(
                     selected = isRecruited,
                     onClick = onToggleRecruited,
