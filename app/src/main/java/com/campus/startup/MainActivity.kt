@@ -32,6 +32,8 @@ import com.campus.startup.core.navigation.Screen
 import com.campus.startup.core.theme.CampusStartupFinderTheme
 import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.core.theme.PrimaryGreenContainer
+import com.campus.startup.features.auth.LoginScreen
+import com.campus.startup.features.auth.UserSession
 import com.campus.startup.features.matching.data.repository.MatchingRepository
 import com.campus.startup.features.matching.presentation.CofounderDetailScreen
 import com.campus.startup.features.matching.presentation.CofounderMatchingScreen
@@ -143,7 +145,7 @@ class MainActivity : ComponentActivity() {
                                         onClick = {
                                             if (currentRoute != item.route) {
                                                 navController.navigate(item.route) {
-                                                    popUpTo(navController.graph.findStartDestination().id) {
+                                                    popUpTo(StartupRoutes.LIST) {
                                                         saveState = true
                                                     }
                                                     launchSingleTop = true
@@ -181,9 +183,21 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = StartupRoutes.LIST,
+                        startDestination = Screen.Login.route,
                         modifier = Modifier.padding(innerPadding)
                     ) {
+                        // 0. Login Screen (Student or Professor with predefined credentials)
+                        composable(Screen.Login.route) {
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    navController.navigate(StartupRoutes.LIST) {
+                                        popUpTo(Screen.Login.route) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            )
+                        }
+
                         startupProfilesGraph(
                             navController = navController,
                             viewModel = startupViewModel,
@@ -192,18 +206,32 @@ class MainActivity : ComponentActivity() {
                             onOpenProfile = navigateToProfile
                         )
 
-                        // Unified Profile Section (Saved Roles, Your Connections, Your Inbox, Applications)
+                        // Unified Profile Section (Saved Startups/Opportunities/Roles, Connections, Inbox, Applications)
                         composable(Screen.ProfileHub.route) {
                             ProfileHubScreen(
                                 matchingViewModel = matchingViewModel,
                                 recruitmentViewModel = recViewModel,
+                                startupViewModel = startupViewModel,
+                                opportunitiesViewModel = oppViewModel,
                                 onNavigateBack = { navController.popBackStack() },
                                 onEditProfile = { navController.navigate(Screen.EditMatchProfile.route) },
                                 onOpeningClick = { openingId ->
                                     navController.navigate(Screen.RecruitmentDetail.createRoute(openingId))
                                 },
+                                onStartupClick = { startupId ->
+                                    navController.navigate(StartupRoutes.detailRoute(startupId))
+                                },
+                                onOpportunityClick = { oppId ->
+                                    navController.navigate(Screen.Detail.createRoute(oppId))
+                                },
                                 onStudentClick = { profileId ->
                                     navController.navigate(Screen.CofounderDetail.createRoute(profileId))
+                                },
+                                onLogout = {
+                                    UserSession.logout()
+                                    navController.navigate(Screen.Login.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
                                 }
                             )
                         }
