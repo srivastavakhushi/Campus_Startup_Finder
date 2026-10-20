@@ -11,6 +11,17 @@ object MatchCatalog {
 
     val AVATARS = listOf("DEV", "DES", "MKT", "OPS", "AI", "PM", "BIZ", "LEAD")
 
+    val COURSES = listOf(
+        "B.Tech CSE",
+        "B.Tech AI & DS",
+        "B.Tech ECE",
+        "B.Tech IT",
+        "B.Des",
+        "BBA / MBA",
+        "B.Tech Mechanical",
+        "B.Com / Economics"
+    )
+
     val YEARS = listOf("1st Year", "2nd Year", "3rd Year", "4th Year", "Postgraduate")
 
     val INTERESTS = listOf(
@@ -30,12 +41,14 @@ object MatchCatalog {
         "EdTech",
         "FinTech",
         "HealthTech",
+        "AI / ML",
+        "SaaS",
         "Climate",
         "Campus consumer",
-        "SaaS",
         "Social impact",
+        "E-Commerce",
         "Hardware & IoT",
-        "Media",
+        "Gaming",
         "Marketplace"
     )
 

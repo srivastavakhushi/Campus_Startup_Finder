@@ -18,6 +18,14 @@ data class StartupEntity(
     val collaborationTypes: String = "",
     /** Free-text description of what help/skills the startup needs */
     val requirements: String = "",
+    /** Comma-separated interest/skill keywords for personalized matching */
+    val tags: String = "",
+    /** Whether the current student is marked as interested/following this startup */
+    val isInterested: Boolean = false,
+    /** Whether the current student is currently recruited/working in this startup */
+    val isRecruited: Boolean = false,
+    /** Role title if currently recruited in this startup */
+    val recruitedRole: String = "",
     val createdAt: Long = System.currentTimeMillis()
 )
 

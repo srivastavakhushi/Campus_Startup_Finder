@@ -1,7 +1,10 @@
 package com.campus.startup.core.navigation
 
 sealed class Screen(val route: String) {
-    // Startup Recruitment (Primary Feature)
+    // Unified Profile Hub (Applications, Inbox, Saved Roles, Connections)
+    object ProfileHub : Screen("profile_hub")
+
+    // Startup Recruitment
     object Recruitment : Screen("startup_recruitment")
     object RecruitmentDetail : Screen("opening_detail/{openingId}") {
         fun createRoute(openingId: String): String = "opening_detail/$openingId"

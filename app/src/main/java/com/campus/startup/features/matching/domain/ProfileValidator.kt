@@ -6,6 +6,7 @@ import com.campus.startup.features.recruitment.data.model.StartupRoleCategory
 data class ProfileFormErrors(
     val name: String? = null,
     val academic: String? = null,
+    val age: String? = null,
     val skills: String? = null,
     val interests: String? = null,
     val areas: String? = null,
@@ -13,7 +14,7 @@ data class ProfileFormErrors(
     val role: String? = null
 ) {
     val isValid: Boolean
-        get() = listOf(name, academic, skills, interests, areas, goals, role).all { it == null }
+        get() = listOf(name, academic, age, skills, interests, areas, goals, role).all { it == null }
 }
 
 object ProfileValidator {
@@ -23,14 +24,26 @@ object ProfileValidator {
         } else {
             null
         }
-        val academicError = if (profile.branch.trim().length < 2 || profile.year.isBlank()) {
-            "Add your branch and year."
+        val effectiveCourse = profile.course.ifBlank { profile.branch }
+        val academicError = if (effectiveCourse.trim().length < 2 || profile.year.isBlank()) {
+            "Add your course/branch and year."
+        } else {
+            null
+        }
+        val ageError = if (profile.age.isNotBlank() && profile.age.trim().toIntOrNull() !in 15..80) {
+            "Enter a valid age (e.g. 20)."
         } else {
             null
         }
         val skillsError = if (profile.skills.isEmpty()) "Pick at least one skill." else null
-        val interestsError = if (profile.interests.isEmpty()) "Pick at least one interest." else null
-        val areasError = if (profile.areasOfInterest.isEmpty()) "Pick at least one startup area." else null
+        val interestsError = if (profile.interests.isEmpty() && profile.areasOfInterest.isEmpty()) {
+            "Pick at least one interest or startup domain."
+        } else if (profile.interests.isEmpty()) {
+            "Pick at least one interest."
+        } else {
+            null
+        }
+        val areasError = if (profile.areasOfInterest.isEmpty()) "Pick at least one startup area/domain." else null
         val goalsError = if (profile.goals.trim().length < 12) {
             "Describe your entrepreneurial goals in a short sentence."
         } else {
@@ -44,6 +57,7 @@ object ProfileValidator {
         return ProfileFormErrors(
             name = nameError,
             academic = academicError,
+            age = ageError,
             skills = skillsError,
             interests = interestsError,
             areas = areasError,

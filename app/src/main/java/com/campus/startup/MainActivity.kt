@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.RocketLaunch
@@ -17,9 +15,11 @@ import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -35,10 +35,10 @@ import com.campus.startup.core.theme.PrimaryGreenContainer
 import com.campus.startup.features.matching.data.repository.MatchingRepository
 import com.campus.startup.features.matching.presentation.CofounderDetailScreen
 import com.campus.startup.features.matching.presentation.CofounderMatchingScreen
-import com.campus.startup.features.matching.presentation.ConnectionsScreen
 import com.campus.startup.features.matching.presentation.EditMatchProfileScreen
 import com.campus.startup.features.matching.presentation.MatchingViewModel
 import com.campus.startup.features.matching.presentation.MatchingViewModelFactory
+import com.campus.startup.features.matching.presentation.ProfileHubScreen
 import com.campus.startup.features.opportunities.data.repository.OpportunityRepository
 import com.campus.startup.features.opportunities.presentation.*
 import com.campus.startup.features.recruitment.data.repository.RecruitmentRepository
@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
 
             val bottomNavItems = listOf(
                 BottomNavItem(
-                    title = "Startups",
+                    title = "Home",
                     route = StartupRoutes.LIST,
                     selectedIcon = Icons.Filled.Business,
                     unselectedIcon = Icons.Outlined.Business
@@ -109,12 +109,6 @@ class MainActivity : ComponentActivity() {
                     route = Screen.Cofounders.route,
                     selectedIcon = Icons.Filled.Groups,
                     unselectedIcon = Icons.Outlined.Groups
-                ),
-                BottomNavItem(
-                    title = "Applications",
-                    route = Screen.ApplicationsAndFounder.route,
-                    selectedIcon = Icons.AutoMirrored.Filled.Assignment,
-                    unselectedIcon = Icons.AutoMirrored.Outlined.Assignment
                 )
             )
 
@@ -122,9 +116,16 @@ class MainActivity : ComponentActivity() {
                 Screen.Recruitment.route,
                 Screen.Feed.route,
                 Screen.Cofounders.route,
-                Screen.ApplicationsAndFounder.route,
                 StartupRoutes.LIST
             )
+
+            val navigateToProfile: () -> Unit = {
+                if (navController.currentDestination?.route != Screen.ProfileHub.route) {
+                    navController.navigate(Screen.ProfileHub.route) {
+                        launchSingleTop = true
+                    }
+                }
+            }
 
             CampusStartupFinderTheme {
                 Scaffold(
@@ -159,7 +160,10 @@ class MainActivity : ComponentActivity() {
                                         label = {
                                             Text(
                                                 text = item.title,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                maxLines = 1,
+                                                softWrap = false,
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                         },
                                         colors = NavigationBarItemDefaults.colors(
@@ -177,23 +181,41 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.Recruitment.route,
+                        startDestination = StartupRoutes.LIST,
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        startupProfilesGraph(navController, startupViewModel)
-                        // 1. Startup Recruitment Screen (Primary Landing)
+                        startupProfilesGraph(
+                            navController = navController,
+                            viewModel = startupViewModel,
+                            matchingViewModel = matchingViewModel,
+                            recruitmentViewModel = recViewModel,
+                            onOpenProfile = navigateToProfile
+                        )
+
+                        // Unified Profile Section (Saved Roles, Your Connections, Your Inbox, Applications)
+                        composable(Screen.ProfileHub.route) {
+                            ProfileHubScreen(
+                                matchingViewModel = matchingViewModel,
+                                recruitmentViewModel = recViewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                                onEditProfile = { navController.navigate(Screen.EditMatchProfile.route) },
+                                onOpeningClick = { openingId ->
+                                    navController.navigate(Screen.RecruitmentDetail.createRoute(openingId))
+                                },
+                                onStudentClick = { profileId ->
+                                    navController.navigate(Screen.CofounderDetail.createRoute(profileId))
+                                }
+                            )
+                        }
+
+                        // 1. Startup Recruitment Screen
                         composable(Screen.Recruitment.route) {
                             StartupRecruitmentScreen(
                                 viewModel = recViewModel,
                                 onOpeningClick = { openingId ->
                                     navController.navigate(Screen.RecruitmentDetail.createRoute(openingId))
                                 },
-                                onNavigateToApplications = {
-                                    navController.navigate(Screen.ApplicationsAndFounder.route)
-                                },
-                                onNavigateToSaved = {
-                                    navController.navigate(Screen.ApplicationsAndFounder.route)
-                                }
+                                onOpenProfile = navigateToProfile
                             )
                         }
 
@@ -214,32 +236,14 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // 3. Applications, Saved Roles & Founder Hub Screen
-                        composable(Screen.ApplicationsAndFounder.route) {
-                            ApplicationsAndFounderScreen(
-                                viewModel = recViewModel,
-                                onNavigateBack = {
-                                    navController.popBackStack()
-                                },
-                                onOpeningClick = { openingId ->
-                                    navController.navigate(Screen.RecruitmentDetail.createRoute(openingId))
-                                }
-                            )
-                        }
-
-                        // 4. Co-founder & Team Matching
+                        // 3. Co-founder & Team Matching
                         composable(Screen.Cofounders.route) {
                             CofounderMatchingScreen(
                                 viewModel = matchingViewModel,
                                 onStudentClick = { profileId ->
                                     navController.navigate(Screen.CofounderDetail.createRoute(profileId))
                                 },
-                                onEditProfile = {
-                                    navController.navigate(Screen.EditMatchProfile.route)
-                                },
-                                onOpenConnections = {
-                                    navController.navigate(Screen.CofounderConnections.route)
-                                }
+                                onOpenProfile = navigateToProfile
                             )
                         }
 
@@ -258,37 +262,27 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(Screen.EditMatchProfile.route) {
+                            val allStartups by startupViewModel.allStartups.collectAsState()
                             EditMatchProfileScreen(
                                 viewModel = matchingViewModel,
+                                availableStartups = allStartups,
                                 onNavigateBack = { navController.popBackStack() },
                                 onSaved = { navController.popBackStack() }
                             )
                         }
 
-                        composable(Screen.CofounderConnections.route) {
-                            ConnectionsScreen(
-                                viewModel = matchingViewModel,
-                                onNavigateBack = { navController.popBackStack() },
-                                onStudentClick = { profileId ->
-                                    navController.navigate(Screen.CofounderDetail.createRoute(profileId))
-                                }
-                            )
-                        }
-
-                        // 5. Opportunities Feed (Hackathons, Grants & Competitions)
+                        // 4. Opportunities Feed (Hackathons, Grants & Competitions)
                         composable(Screen.Feed.route) {
                             OpportunitiesFeedScreen(
                                 viewModel = oppViewModel,
                                 onOpportunityClick = { oppId ->
                                     navController.navigate(Screen.Detail.createRoute(oppId))
                                 },
-                                onNavigateToSaved = {
-                                    navController.navigate(Screen.Saved.route)
-                                }
+                                onOpenProfile = navigateToProfile
                             )
                         }
 
-                        // 6. Opportunity Detail Screen
+                        // 5. Opportunity Detail Screen
                         composable(
                             route = Screen.Detail.route,
                             arguments = listOf(
@@ -301,19 +295,6 @@ class MainActivity : ComponentActivity() {
                                 viewModel = oppViewModel,
                                 onNavigateBack = {
                                     navController.popBackStack()
-                                }
-                            )
-                        }
-
-                        // 7. Saved Opportunities Screen
-                        composable(Screen.Saved.route) {
-                            SavedOpportunitiesScreen(
-                                viewModel = oppViewModel,
-                                onNavigateBack = {
-                                    navController.popBackStack()
-                                },
-                                onOpportunityClick = { oppId ->
-                                    navController.navigate(Screen.Detail.createRoute(oppId))
                                 }
                             )
                         }

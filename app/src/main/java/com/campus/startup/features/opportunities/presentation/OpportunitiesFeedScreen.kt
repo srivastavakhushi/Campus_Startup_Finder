@@ -1,25 +1,22 @@
 package com.campus.startup.features.opportunities.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.RocketLaunch
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.campus.startup.core.theme.PrimaryBlue
+import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.core.theme.StartupGreen
 import com.campus.startup.features.opportunities.presentation.components.CategoryChipRow
 import com.campus.startup.features.opportunities.presentation.components.OpportunityCard
@@ -30,7 +27,7 @@ import com.campus.startup.features.opportunities.presentation.components.SearchB
 fun OpportunitiesFeedScreen(
     viewModel: OpportunitiesViewModel,
     onOpportunityClick: (String) -> Unit,
-    onNavigateToSaved: () -> Unit
+    onOpenProfile: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -55,24 +52,13 @@ fun OpportunitiesFeedScreen(
                     }
                 },
                 actions = {
-                    val count = (uiState as? OpportunitiesUiState.Success)?.bookmarkedCount ?: 0
-                    BadgedBox(
-                        badge = {
-                            if (count > 0) {
-                                Badge(containerColor = PrimaryBlue) {
-                                    Text(count.toString())
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        IconButton(onClick = onNavigateToSaved) {
-                            Icon(
-                                imageVector = if (count > 0) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                                contentDescription = "Saved Opportunities",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                    IconButton(onClick = onOpenProfile) {
+                        Icon(
+                            imageVector = Icons.Outlined.AccountCircle,
+                            contentDescription = "My Profile",
+                            tint = PrimaryGreen,
+                            modifier = Modifier.size(28.dp)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -96,19 +82,16 @@ fun OpportunitiesFeedScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Search Input
             SearchBarComponent(
                 query = searchQuery,
                 onQueryChange = viewModel::onSearchQueryChanged
             )
 
-            // Category Chips Row
             CategoryChipRow(
                 selectedType = selectedType,
                 onTypeSelected = viewModel::onTypeSelected
             )
 
-            // Feed Content
             when (val state = uiState) {
                 is OpportunitiesUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -154,7 +137,6 @@ fun OpportunitiesFeedScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
                         ) {
-                            // Header stats pill
                             item {
                                 Row(
                                     modifier = Modifier

@@ -24,7 +24,7 @@ import com.campus.startup.features.startupprofiles.data.model.StartupEntity
         StudentProfileEntity::class,
         ConnectionRequestEntity::class
     ],
-    version = 3,
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -44,8 +44,9 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "campus_startup_db"
-                ).fallbackToDestructiveMigration().build()
+                    "campus_startup_v2_db"
+                ).fallbackToDestructiveMigration(dropAllTables = true)
+                    .build()
                 INSTANCE = instance
                 instance
             }

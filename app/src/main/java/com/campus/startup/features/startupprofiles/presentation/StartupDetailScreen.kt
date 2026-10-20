@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,9 +17,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.campus.startup.core.theme.PrimaryGreen
+import com.campus.startup.core.theme.PrimaryGreenContainer
 import com.campus.startup.features.startupprofiles.data.model.toCsvList
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -60,7 +69,15 @@ fun StartupDetailScreen(
                     }
                 },
                 actions = {
-                    if (startup != null) {
+                    val s = startup
+                    if (s != null) {
+                        IconButton(onClick = { viewModel.toggleInterested(s) }) {
+                            Icon(
+                                imageVector = if (s.isInterested) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                contentDescription = "Interested",
+                                tint = if (s.isInterested) PrimaryGreen else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                         IconButton(onClick = { onEdit(startupId) }) {
                             Icon(Icons.Filled.Edit, contentDescription = "Edit")
                         }
@@ -95,6 +112,31 @@ fun StartupDetailScreen(
                 ) {
                     StartupTag(s.domain)
                     StartupTag(s.stage)
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = s.isInterested,
+                        onClick = { viewModel.toggleInterested(s) },
+                        label = { Text(if (s.isInterested) "Interested ✓" else "Mark Interested") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = PrimaryGreenContainer,
+                            selectedLabelColor = PrimaryGreen
+                        )
+                    )
+                    FilterChip(
+                        selected = s.isRecruited,
+                        onClick = { viewModel.toggleRecruited(s) },
+                        label = { Text(if (s.isRecruited) "Currently Recruited ✓" else "Mark as Recruited") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = PrimaryGreenContainer,
+                            selectedLabelColor = PrimaryGreen
+                        )
+                    )
                 }
 
                 DetailSection("About") { Text(s.description) }

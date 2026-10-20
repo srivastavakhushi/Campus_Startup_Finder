@@ -5,6 +5,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.campus.startup.core.navigation.Screen
+import com.campus.startup.features.matching.presentation.MatchingViewModel
+import com.campus.startup.features.recruitment.presentation.RecruitmentViewModel
 
 object StartupRoutes {
     const val LIST = "startup_list"
@@ -18,13 +21,20 @@ object StartupRoutes {
 /** One call from MainActivity's NavHost registers every Startup Profiles screen. */
 fun NavGraphBuilder.startupProfilesGraph(
     navController: NavHostController,
-    viewModel: StartupProfilesViewModel
+    viewModel: StartupProfilesViewModel,
+    matchingViewModel: MatchingViewModel,
+    recruitmentViewModel: RecruitmentViewModel,
+    onOpenProfile: () -> Unit = { navController.navigate(Screen.ProfileHub.route) }
 ) {
     composable(StartupRoutes.LIST) {
         StartupListScreen(
             viewModel = viewModel,
+            matchingViewModel = matchingViewModel,
+            recruitmentViewModel = recruitmentViewModel,
             onStartupClick = { navController.navigate(StartupRoutes.detail(it)) },
-            onAddClick = { navController.navigate(StartupRoutes.form()) }
+            onAddClick = { navController.navigate(StartupRoutes.form()) },
+            onCreateOrEditProfile = { navController.navigate(Screen.EditMatchProfile.route) },
+            onOpenProfileHub = onOpenProfile
         )
     }
 

@@ -8,24 +8,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BusinessCenter
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Assignment
-import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.campus.startup.core.theme.PrimaryBlue
+import com.campus.startup.core.theme.PrimaryGreen
 import com.campus.startup.core.theme.StartupGreen
 import com.campus.startup.features.opportunities.presentation.components.SearchBarComponent
-import com.campus.startup.features.recruitment.data.model.StartupRoleCategory
 import com.campus.startup.features.recruitment.presentation.components.RoleCategoryTabs
 import com.campus.startup.features.recruitment.presentation.components.SkillFilterSection
 import com.campus.startup.features.recruitment.presentation.components.StartupOpeningCard
@@ -35,8 +30,7 @@ import com.campus.startup.features.recruitment.presentation.components.StartupOp
 fun StartupRecruitmentScreen(
     viewModel: RecruitmentViewModel,
     onOpeningClick: (String) -> Unit,
-    onNavigateToApplications: () -> Unit,
-    onNavigateToSaved: () -> Unit,
+    onOpenProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -81,34 +75,13 @@ fun StartupRecruitmentScreen(
                     }
                 },
                 actions = {
-                    // Applications tracker
-                    IconButton(onClick = onNavigateToApplications) {
+                    IconButton(onClick = onOpenProfile) {
                         Icon(
-                            imageVector = Icons.Outlined.Assignment,
-                            contentDescription = "Applications & Founder Portal",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            imageVector = Icons.Outlined.AccountCircle,
+                            contentDescription = "My Profile",
+                            tint = PrimaryGreen,
+                            modifier = Modifier.size(28.dp)
                         )
-                    }
-
-                    // Saved bookmarks
-                    val savedCount = (uiState as? RecruitmentUiState.Success)?.savedCount ?: 0
-                    BadgedBox(
-                        badge = {
-                            if (savedCount > 0) {
-                                Badge(containerColor = PrimaryBlue) {
-                                    Text(savedCount.toString())
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        IconButton(onClick = onNavigateToSaved) {
-                            Icon(
-                                imageVector = if (savedCount > 0) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                                contentDescription = "Saved Roles",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -132,19 +105,16 @@ fun StartupRecruitmentScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Search Input
             SearchBarComponent(
                 query = searchQuery,
                 onQueryChange = viewModel::onSearchQueryChanged
             )
 
-            // Role Categories Filter: All, Developers, Designers, Marketers, Interns
             RoleCategoryTabs(
                 selectedCategory = selectedCategory,
                 onCategorySelected = viewModel::onCategorySelected
             )
 
-            // Work Type Filter Chips (All, Remote, Hybrid, On-Campus)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,7 +133,6 @@ fun StartupRecruitmentScreen(
                 }
             }
 
-            // Smart Skill Matcher Section (interactive skill selector & match toggle)
             SkillFilterSection(
                 studentSkills = studentSkills,
                 onlyMatching = onlyMatching,
@@ -171,7 +140,6 @@ fun StartupRecruitmentScreen(
                 onOnlyMatchingToggle = viewModel::toggleOnlyMatching
             )
 
-            // Openings List or Empty State
             when (val state = uiState) {
                 is RecruitmentUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -217,7 +185,6 @@ fun StartupRecruitmentScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
                         ) {
-                            // Subheader stats
                             item {
                                 Row(
                                     modifier = Modifier

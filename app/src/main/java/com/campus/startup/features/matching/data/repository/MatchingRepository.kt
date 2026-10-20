@@ -13,11 +13,9 @@ import kotlinx.coroutines.flow.map
 import java.util.UUID
 
 /**
- * Local co-founder directory.
+ * Local co-founder & student profile directory.
  *
- * The project has no authentication or Firebase user profile. The signed-in student is the
- * single local row [MatchCatalog.CURRENT_USER_ID]. Other rows are sample campus profiles,
- * inserted only when the table is empty, and are kept separate from that row.
+ * The signed-in student is stored at [MatchCatalog.CURRENT_USER_ID].
  */
 class MatchingRepository(
     private val matchingDao: MatchingDao
@@ -45,15 +43,25 @@ class MatchingRepository(
         return matchingDao.observeProfiles().map { rows -> rows.map { it.toDomain() } }
     }
 
+    fun observeCurrentUserProfile(): Flow<StudentMatchProfile?> {
+        return matchingDao.observeProfiles().map { rows ->
+            rows.find { it.isCurrentUser || it.id == MatchCatalog.CURRENT_USER_ID }?.toDomain()
+        }
+    }
+
     fun observeConnections(): Flow<List<ConnectionRequest>> {
         return matchingDao.observeConnections().map { rows -> rows.map { it.toDomain() } }
     }
 
     suspend fun saveCurrentProfile(profile: StudentMatchProfile) {
         val existing = matchingDao.getProfile(MatchCatalog.CURRENT_USER_ID)
+        val effectiveBranch = profile.branch.ifBlank { profile.course }
+        val effectiveCourse = profile.course.ifBlank { profile.branch }
         matchingDao.insertProfile(
             profile.copy(
                 id = MatchCatalog.CURRENT_USER_ID,
+                branch = effectiveBranch,
+                course = effectiveCourse,
                 isCurrentUser = true
             ).toEntity(updatedAt = System.currentTimeMillis(), fallbackAvatar = existing?.avatar)
         )
@@ -108,8 +116,13 @@ class MatchingRepository(
             name = name,
             avatar = avatar.ifBlank { "ME" },
             branch = branch,
+            course = course.ifBlank { branch },
+            age = age,
             year = year,
             college = college,
+            resumeUri = resumeUri,
+            resumeName = resumeName,
+            recruitedStartupIds = recruitedStartupIdsCsv.toCsvList(),
             skills = skillsCsv.toCsvList(),
             interests = interestsCsv.toCsvList(),
             areasOfInterest = areasCsv.toCsvList(),
@@ -124,13 +137,20 @@ class MatchingRepository(
     }
 
     private fun StudentMatchProfile.toEntity(updatedAt: Long, fallbackAvatar: String?): StudentProfileEntity {
+        val effectiveBranch = branch.ifBlank { course }.trim()
+        val effectiveCourse = course.ifBlank { branch }.trim()
         return StudentProfileEntity(
             id = id,
             name = name.trim(),
             avatar = avatar.ifBlank { fallbackAvatar ?: "ME" },
-            branch = branch.trim(),
+            branch = effectiveBranch,
+            course = effectiveCourse,
+            age = age.trim(),
             year = year.trim(),
             college = college.trim(),
+            resumeUri = resumeUri.trim(),
+            resumeName = resumeName.trim(),
+            recruitedStartupIdsCsv = recruitedStartupIds.toCsv(),
             skillsCsv = skills.toCsv(),
             interestsCsv = interests.toCsv(),
             areasCsv = areasOfInterest.toCsv(),
@@ -167,8 +187,13 @@ class MatchingRepository(
             name = "",
             avatar = "ME",
             branch = "",
+            course = "",
+            age = "",
             year = "",
             college = "",
+            resumeUri = "",
+            resumeName = "",
+            recruitedStartupIdsCsv = "",
             skillsCsv = "",
             interestsCsv = "",
             areasCsv = "",
@@ -182,16 +207,13 @@ class MatchingRepository(
         )
     }
 
-    /**
-     * Development fixtures for the campus directory. Not the current student.
-     */
     private fun sampleDirectory(): List<StudentProfileEntity> {
         return listOf(
             sample(
                 id = "student_aisha",
                 name = "Aisha Rahman",
                 avatar = "AR",
-                branch = "Design",
+                branch = "B.Des",
                 year = "3rd Year",
                 skills = "Figma, UI/UX Design, Prototyping",
                 interests = "Product Design, Sustainability",
@@ -206,11 +228,11 @@ class MatchingRepository(
                 id = "student_rohan",
                 name = "Rohan Verma",
                 avatar = "RV",
-                branch = "CSE",
+                branch = "B.Tech CSE",
                 year = "4th Year",
                 skills = "Python, AI & LLMs, Firebase / SQL",
                 interests = "Artificial Intelligence, Data",
-                areas = "EdTech, SaaS",
+                areas = "EdTech, AI / ML, SaaS",
                 experience = "Research assistant on a syllabus search prototype and an AI lab internship.",
                 tags = "Research, Internship",
                 goals = "Looking for a research spinout that turns course material into a useful study product.",
@@ -221,7 +243,7 @@ class MatchingRepository(
                 id = MEERA_ID,
                 name = "Meera Iyer",
                 avatar = "MI",
-                branch = "Management",
+                branch = "BBA / MBA",
                 year = "2nd Year",
                 skills = "Growth Marketing, Campus Outreach, Community Building",
                 interests = "Community, Public Speaking",
@@ -236,7 +258,7 @@ class MatchingRepository(
                 id = "student_kabir",
                 name = "Kabir Shah",
                 avatar = "KS",
-                branch = "CSE",
+                branch = "B.Tech CSE",
                 year = "3rd Year",
                 skills = "Kotlin, Jetpack Compose, Firebase / SQL",
                 interests = "Open Source, Artificial Intelligence",
@@ -251,7 +273,7 @@ class MatchingRepository(
                 id = "student_ananya",
                 name = "Ananya Sen",
                 avatar = "AS",
-                branch = "Mechanical",
+                branch = "B.Tech Mechanical",
                 year = "3rd Year",
                 skills = "Product Management, Operations, Market Research",
                 interests = "Sustainability, Writing",
@@ -266,7 +288,7 @@ class MatchingRepository(
                 id = "student_dev",
                 name = "Dev Patel",
                 avatar = "DP",
-                branch = "IT",
+                branch = "B.Tech IT",
                 year = "2nd Year",
                 skills = "Flutter, Node.js / Express, React / Next.js",
                 interests = "Finance, Open Source",
@@ -281,7 +303,7 @@ class MatchingRepository(
                 id = "student_sara",
                 name = "Sara Khan",
                 avatar = "SK",
-                branch = "Design",
+                branch = "B.Des",
                 year = "2nd Year",
                 skills = "Graphic Design, Canva & Adobe Suite, Content Writing",
                 interests = "Writing, Community",
@@ -296,7 +318,7 @@ class MatchingRepository(
                 id = "student_arjun",
                 name = "Arjun Nair",
                 avatar = "AN",
-                branch = "Commerce",
+                branch = "B.Com / Economics",
                 year = "4th Year",
                 skills = "Sales & Pitching, Market Research, Growth Marketing",
                 interests = "Finance, Public Speaking",
@@ -330,6 +352,8 @@ class MatchingRepository(
             name = name,
             avatar = avatar,
             branch = branch,
+            course = branch,
+            age = "20",
             year = year,
             college = "Campus Engineering",
             skillsCsv = skills,

@@ -6,10 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.Style
@@ -36,8 +34,7 @@ import com.campus.startup.features.recruitment.presentation.components.RoleCateg
 fun CofounderMatchingScreen(
     viewModel: MatchingViewModel,
     onStudentClick: (String) -> Unit,
-    onEditProfile: () -> Unit,
-    onOpenConnections: () -> Unit,
+    onOpenProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -100,33 +97,13 @@ fun CofounderMatchingScreen(
                         )
                     }
 
-                    // Connection requests badge
-                    val pending = (uiState as? MatchingUiState.Success)?.pendingIncoming ?: 0
-                    BadgedBox(
-                        badge = {
-                            if (pending > 0) {
-                                Badge(containerColor = PrimaryGreen) {
-                                    Text(pending.toString(), color = Color(0xFF071206), fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(end = 4.dp)
-                    ) {
-                        IconButton(onClick = onOpenConnections) {
-                            Icon(
-                                imageVector = if (pending > 0) Icons.Filled.Groups else Icons.Outlined.Groups,
-                                contentDescription = "Connection requests",
-                                tint = DarkTextPrimary
-                            )
-                        }
-                    }
-
-                    // Profile icon button
-                    IconButton(onClick = onEditProfile) {
+                    // Profile icon button in the corner -> Opens Profile section
+                    IconButton(onClick = onOpenProfile) {
                         Icon(
                             imageVector = Icons.Outlined.AccountCircle,
                             contentDescription = "My Profile",
-                            tint = DarkTextPrimary
+                            tint = PrimaryGreen,
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 },
@@ -171,7 +148,6 @@ fun CofounderMatchingScreen(
                             onClear = viewModel::clearFilters
                         )
                     } else if (isSwipeMode) {
-                        // Section 3: Dating-App Swipe Interface
                         val studentList = state.students
                         val currentStudent = studentList.getOrNull(activeCardIndex)
 
@@ -181,7 +157,6 @@ fun CofounderMatchingScreen(
                                 .padding(vertical = 8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Mini deck progress indicator
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -225,7 +200,6 @@ fun CofounderMatchingScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                             } else {
-                                // Deck Finished / Empty State (Requirement 3C)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -309,7 +283,6 @@ fun CofounderMatchingScreen(
                             }
                         }
                     } else {
-                        // Section 3: Directory / List View Mode
                         SearchBarComponent(
                             query = searchQuery,
                             onQueryChange = viewModel::onSearchQueryChanged,
