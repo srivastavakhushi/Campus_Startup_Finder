@@ -1,7 +1,10 @@
 package com.campus.startup.core.navigation
 
 sealed class Screen(val route: String) {
-    // Unified Profile Hub (Applications, Inbox, Saved Roles, Connections)
+    // Login Screen (Student or Professor)
+    object Login : Screen("login")
+
+    // Unified Profile Hub (Saved Startups, Opportunities & Roles, Connections, Inbox, Applications)
     object ProfileHub : Screen("profile_hub")
 
     // Startup Recruitment
