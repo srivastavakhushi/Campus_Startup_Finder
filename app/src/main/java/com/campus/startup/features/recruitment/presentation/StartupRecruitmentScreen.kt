@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BusinessCenter
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.*
@@ -191,8 +192,13 @@ fun StartupRecruitmentScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(text = "🔎", style = MaterialTheme.typography.headlineLarge)
-                                Spacer(modifier = Modifier.height(10.dp))
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(52.dp)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = "No startup openings found",
                                     style = MaterialTheme.typography.titleMedium,
@@ -231,13 +237,24 @@ fun StartupRecruitmentScreen(
                                             shape = RoundedCornerShape(8.dp),
                                             color = StartupGreen.copy(alpha = 0.15f)
                                         ) {
-                                            Text(
-                                                text = "🔥 ${state.highMatchCount} High Matches for you",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = StartupGreen,
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                                            )
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.AutoAwesome,
+                                                    contentDescription = null,
+                                                    tint = StartupGreen,
+                                                    modifier = Modifier.size(13.dp)
+                                                )
+                                                Text(
+                                                    text = "${state.highMatchCount} High Matches for you",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = StartupGreen
+                                                )
+                                            }
                                         }
                                     }
                                 }

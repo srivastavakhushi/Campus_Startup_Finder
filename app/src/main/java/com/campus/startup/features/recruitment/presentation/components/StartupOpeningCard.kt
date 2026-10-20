@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.LocationOn
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.campus.startup.core.components.StartupBadgeLogo
 import com.campus.startup.core.theme.PrimaryBlue
 import com.campus.startup.core.theme.StartupGreen
 import com.campus.startup.features.recruitment.data.model.StartupOpening
@@ -61,20 +63,12 @@ fun StartupOpeningCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = opening.startupLogo,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
+                    StartupBadgeLogo(
+                        startupName = opening.startupName,
+                        size = 42.dp
+                    )
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     Column {
                         Text(
@@ -127,27 +121,26 @@ fun StartupOpeningCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = when (opening.roleCategory) {
-                        StartupRoleCategory.DEVELOPER -> Color(0xFFEFF6FF)
-                        StartupRoleCategory.DESIGNER -> Color(0xFFFAF5FF)
-                        StartupRoleCategory.MARKETER -> Color(0xFFFFFBEB)
-                        StartupRoleCategory.INTERN -> Color(0xFFECFDF5)
-                        else -> MaterialTheme.colorScheme.secondaryContainer
-                    }
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ) {
-                    Text(
-                        text = "${opening.roleCategory.emoji} ${opening.roleCategory.displayName}",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = when (opening.roleCategory) {
-                            StartupRoleCategory.DEVELOPER -> Color(0xFF1D4ED8)
-                            StartupRoleCategory.DESIGNER -> Color(0xFF7E22CE)
-                            StartupRoleCategory.MARKETER -> Color(0xFFB45309)
-                            StartupRoleCategory.INTERN -> Color(0xFF047857)
-                            else -> MaterialTheme.colorScheme.onSecondaryContainer
-                        },
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = opening.roleCategory.getIcon(),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Text(
+                            text = opening.roleCategory.displayName,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
 
                 Surface(
@@ -188,13 +181,26 @@ fun StartupOpeningCard(
                         shape = RoundedCornerShape(6.dp),
                         color = if (isMatched) StartupGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     ) {
-                        Text(
-                            text = if (isMatched) "✓ $skill" else skill,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = if (isMatched) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isMatched) StartupGreen else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            if (isMatched) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = StartupGreen,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                            Text(
+                                text = skill,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (isMatched) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isMatched) StartupGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

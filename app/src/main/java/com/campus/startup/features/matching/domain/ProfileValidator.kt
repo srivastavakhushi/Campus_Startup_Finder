@@ -1,0 +1,54 @@
+package com.campus.startup.features.matching.domain
+
+import com.campus.startup.features.matching.data.model.StudentMatchProfile
+import com.campus.startup.features.recruitment.data.model.StartupRoleCategory
+
+data class ProfileFormErrors(
+    val name: String? = null,
+    val academic: String? = null,
+    val skills: String? = null,
+    val interests: String? = null,
+    val areas: String? = null,
+    val goals: String? = null,
+    val role: String? = null
+) {
+    val isValid: Boolean
+        get() = listOf(name, academic, skills, interests, areas, goals, role).all { it == null }
+}
+
+object ProfileValidator {
+    fun validate(profile: StudentMatchProfile): ProfileFormErrors {
+        val nameError = if (profile.name.trim().length < 2) {
+            "Enter your name (at least 2 characters)."
+        } else {
+            null
+        }
+        val academicError = if (profile.branch.trim().length < 2 || profile.year.isBlank()) {
+            "Add your branch and year."
+        } else {
+            null
+        }
+        val skillsError = if (profile.skills.isEmpty()) "Pick at least one skill." else null
+        val interestsError = if (profile.interests.isEmpty()) "Pick at least one interest." else null
+        val areasError = if (profile.areasOfInterest.isEmpty()) "Pick at least one startup area." else null
+        val goalsError = if (profile.goals.trim().length < 12) {
+            "Describe your entrepreneurial goals in a short sentence."
+        } else {
+            null
+        }
+        val roleError = if (profile.preferredRole == StartupRoleCategory.ALL) {
+            "Choose the role you want to play on a team."
+        } else {
+            null
+        }
+        return ProfileFormErrors(
+            name = nameError,
+            academic = academicError,
+            skills = skillsError,
+            interests = interestsError,
+            areas = areasError,
+            goals = goalsError,
+            role = roleError
+        )
+    }
+}
