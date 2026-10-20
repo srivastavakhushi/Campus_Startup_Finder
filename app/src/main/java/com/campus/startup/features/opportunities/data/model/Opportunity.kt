@@ -13,5 +13,7 @@ data class Opportunity(
     val requirements: List<String> = emptyList(),
     val perks: List<String> = emptyList(),
     val applyUrl: String = "https://campus-startup.edu/apply",
+    val isLiked: Boolean = false,
+    val likesCount: Int = 24,
     val isBookmarked: Boolean = false
 )

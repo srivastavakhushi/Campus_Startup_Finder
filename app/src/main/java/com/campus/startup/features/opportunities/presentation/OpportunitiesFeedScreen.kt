@@ -178,7 +178,8 @@ fun OpportunitiesFeedScreen(
                                 OpportunityCard(
                                     opportunity = opportunity,
                                     onClick = { onOpportunityClick(opportunity.id) },
-                                    onBookmarkToggle = { viewModel.toggleBookmark(opportunity) }
+                                    onBookmarkToggle = { viewModel.toggleBookmark(opportunity) },
+                                    onLikeToggle = { viewModel.toggleLike(opportunity) }
                                 )
                             }
                         }

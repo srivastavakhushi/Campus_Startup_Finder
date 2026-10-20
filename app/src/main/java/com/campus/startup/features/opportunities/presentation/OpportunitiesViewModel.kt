@@ -66,9 +66,19 @@ class OpportunitiesViewModel(
         _selectedType.value = type
     }
 
+    fun toggleLike(opportunity: Opportunity) {
+        repository.toggleLike(opportunity.id)
+    }
+
     fun toggleBookmark(opportunity: Opportunity) {
         viewModelScope.launch {
             repository.toggleBookmark(opportunity)
+        }
+    }
+
+    fun removeSavedOpportunity(id: String) {
+        viewModelScope.launch {
+            repository.removeSavedOpportunityById(id)
         }
     }
 

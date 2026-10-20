@@ -7,13 +7,12 @@ import com.campus.startup.features.opportunities.data.model.OpportunityType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 class OpportunityRepository(
     private val opportunityDao: OpportunityDao
 ) {
 
-    // Initial realistic mock opportunities (can be plugged into Cloud Firestore)
+    // Initial realistic campus opportunities
     private val _opportunities = MutableStateFlow<List<Opportunity>>(
         listOf(
             Opportunity(
@@ -32,7 +31,9 @@ class OpportunityRepository(
                     "Working MVP or prototype submission"
                 ),
                 perks = listOf("Direct entry to national round", "Full travel sponsorship", "Incubation mentorship"),
-                applyUrl = "https://sih.gov.in"
+                applyUrl = "https://sih.gov.in",
+                isLiked = true,
+                likesCount = 48
             ),
             Opportunity(
                 id = "opp_2",
@@ -50,7 +51,9 @@ class OpportunityRepository(
                     "Passion for early-stage startup culture"
                 ),
                 perks = listOf("Founding engineer equity grant", "Flexible hours during exam weeks", "Direct user feedback"),
-                applyUrl = "https://campusbites.internal/apply"
+                applyUrl = "https://campusbites.internal/apply",
+                isLiked = false,
+                likesCount = 34
             ),
             Opportunity(
                 id = "opp_3",
@@ -68,7 +71,9 @@ class OpportunityRepository(
                     "Clear problem-solution validation"
                 ),
                 perks = listOf("Zero equity taken", "Free campus office space", "Legal & patent registration support"),
-                applyUrl = "https://iic.college.edu/grant"
+                applyUrl = "https://iic.college.edu/grant",
+                isLiked = true,
+                likesCount = 62
             ),
             Opportunity(
                 id = "opp_4",
@@ -86,7 +91,9 @@ class OpportunityRepository(
                     "Good eye for typography and spacing"
                 ),
                 perks = listOf("Letter of Recommendation", "Paid Figma & asset subscriptions", "Mentorship from Senior Designers"),
-                applyUrl = "https://docusummarize.ai/careers"
+                applyUrl = "https://docusummarize.ai/careers",
+                isLiked = false,
+                likesCount = 29
             ),
             Opportunity(
                 id = "opp_5",
@@ -104,7 +111,9 @@ class OpportunityRepository(
                     "Solo or team entries welcome"
                 ),
                 perks = listOf("Investor network access", "Media coverage in campus newsletter", "Free cloud credits"),
-                applyUrl = "https://ecell.college.edu/sharktank"
+                applyUrl = "https://ecell.college.edu/sharktank",
+                isLiked = false,
+                likesCount = 53
             )
         )
     )
@@ -121,6 +130,18 @@ class OpportunityRepository(
 
     fun getOpportunityById(id: String): Opportunity? {
         return _opportunities.value.find { it.id == id }
+    }
+
+    fun toggleLike(opportunityId: String) {
+        _opportunities.value = _opportunities.value.map { opp ->
+            if (opp.id == opportunityId) {
+                val nextLiked = !opp.isLiked
+                val nextCount = if (nextLiked) opp.likesCount + 1 else (opp.likesCount - 1).coerceAtLeast(0)
+                opp.copy(isLiked = nextLiked, likesCount = nextCount)
+            } else {
+                opp
+            }
+        }
     }
 
     suspend fun toggleBookmark(opportunity: Opportunity) {
@@ -141,6 +162,10 @@ class OpportunityRepository(
                 )
             )
         }
+    }
+
+    suspend fun removeSavedOpportunityById(id: String) {
+        opportunityDao.removeOpportunity(id)
     }
 
     fun getSavedOpportunities(): Flow<List<OpportunityEntity>> {

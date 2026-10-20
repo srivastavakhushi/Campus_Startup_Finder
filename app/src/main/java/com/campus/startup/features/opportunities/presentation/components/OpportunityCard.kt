@@ -1,13 +1,15 @@
 package com.campus.startup.features.opportunities.presentation.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -26,6 +28,7 @@ fun OpportunityCard(
     opportunity: Opportunity,
     onClick: () -> Unit,
     onBookmarkToggle: () -> Unit,
+    onLikeToggle: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val (typeBg, typeText) = when (opportunity.type) {
@@ -46,6 +49,10 @@ fun OpportunityCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (opportunity.isBookmarked) PrimaryGreen.copy(alpha = 0.45f) else DarkBorder
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -53,7 +60,7 @@ fun OpportunityCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Header: Type Tag & Bookmark Icon
+            // Header: Type Tag & Both Like + Save Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -84,15 +91,70 @@ fun OpportunityCard(
                     }
                 }
 
-                IconButton(
-                    onClick = onBookmarkToggle,
-                    modifier = Modifier.size(32.dp)
+                // Like and Save action pills
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = if (opportunity.isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                        contentDescription = "Bookmark",
-                        tint = if (opportunity.isBookmarked) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Like Button
+                    Surface(
+                        modifier = Modifier.clickable(onClick = onLikeToggle),
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (opportunity.isLiked) Color(0xFF36151E) else DarkSurfaceVariant,
+                        border = BorderStroke(
+                            1.dp,
+                            if (opportunity.isLiked) Color(0xFFF43F5E).copy(alpha = 0.6f) else DarkBorder
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (opportunity.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Like Opportunity",
+                                tint = if (opportunity.isLiked) Color(0xFFF43F5E) else DarkTextSecondary,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = if (opportunity.isLiked) "Liked (${opportunity.likesCount})" else "Like (${opportunity.likesCount})",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (opportunity.isLiked) Color(0xFFF43F5E) else DarkTextSecondary
+                            )
+                        }
+                    }
+
+                    // Save Button
+                    Surface(
+                        modifier = Modifier.clickable(onClick = onBookmarkToggle),
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (opportunity.isBookmarked) PrimaryGreenContainer else DarkSurfaceVariant,
+                        border = BorderStroke(
+                            1.dp,
+                            if (opportunity.isBookmarked) PrimaryGreen.copy(alpha = 0.6f) else DarkBorder
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (opportunity.isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = "Save Opportunity",
+                                tint = if (opportunity.isBookmarked) PrimaryGreen else DarkTextSecondary,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = if (opportunity.isBookmarked) "Saved" else "Save",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (opportunity.isBookmarked) PrimaryGreen else DarkTextSecondary
+                            )
+                        }
+                    }
                 }
             }
 
